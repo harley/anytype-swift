@@ -15,9 +15,24 @@ extension BlocksViews.Bookmark {
     
     final class UIKitView: UIView {
 
-        private var emptyView: BlocksFileEmptyView!
-        private var bookmarkView: BlocksViews.Bookmark.UIKitViewWithBookmark!
-                
+        private let emptyView: BlocksFileEmptyView = {
+            let view = BlocksFileEmptyView(
+                viewData: .init(
+                    image: UIImage.blockFile.empty.bookmark,
+                    placeholderText: Constants.Resource.emptyViewPlaceholderTitle
+                )
+            )
+            view.translatesAutoresizingMaskIntoConstraints = false
+            return view
+        }()
+        private let bookmarkView: BlocksViews.Bookmark.UIKitViewWithBookmark = {
+            let view = BlocksViews.Bookmark.UIKitViewWithBookmark()
+            view.layer.borderWidth = 1
+            view.layer.borderColor = UIColor.grayscale30.cgColor
+            view.layer.cornerRadius = 4
+            view.translatesAutoresizingMaskIntoConstraints = false
+            return view
+        }()
         private var subscription: AnyCancellable?
         
         // MARK: - Initializers
@@ -72,44 +87,15 @@ extension BlocksViews.Bookmark.UIKitView {
 
 private extension BlocksViews.Bookmark.UIKitView {
     
-    // MARK: Setup
     func setup() {
         setupUIElements()
-        addLayout()
+        addEmptyViewLayout()
     }
     
-    // MARK: UI Elements
     func setupUIElements() {
-        // Default behavior
-        self.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.bookmarkView = {
-            let view = BlocksViews.Bookmark.UIKitViewWithBookmark()
-            view.layer.borderWidth = 1
-            view.layer.borderColor = UIColor.grayscale30.cgColor
-            view.layer.cornerRadius = 4
-            view.translatesAutoresizingMaskIntoConstraints = false
-            return view
-        }()
-        
-        self.emptyView = {
-            let view = BlocksFileEmptyView(
-                viewData: .init(
-                    image: UIImage.blockFile.empty.bookmark,
-                    placeholderText: Constants.Resource.emptyViewPlaceholderTitle
-                )
-            )
-            view.translatesAutoresizingMaskIntoConstraints = false
-            return view
-        }()
-        
+        translatesAutoresizingMaskIntoConstraints = false
         addSubview(bookmarkView)
         addSubview(emptyView)
-    }
-    
-    // MARK: Layout
-    func addLayout() {
-        self.addEmptyViewLayout()
     }
     
     func addBookmarkViewLayout() {
@@ -117,16 +103,16 @@ private extension BlocksViews.Bookmark.UIKitView {
     }
     
     func addEmptyViewLayout() {
-        if let view = self.emptyView, let superview = view.superview {
-            let heightAnchor = view.heightAnchor.constraint(equalToConstant: Constants.Layout.emptyViewHeight)
-            let bottomAnchor = view.bottomAnchor.constraint(equalTo: superview.bottomAnchor)
+        if let superview = emptyView.superview {
+            let heightAnchor = emptyView.heightAnchor.constraint(equalToConstant: Constants.Layout.emptyViewHeight)
+            let bottomAnchor = emptyView.bottomAnchor.constraint(equalTo: superview.bottomAnchor)
             // We need priotity here cause cell self size constraint will conflict with ours
             bottomAnchor.priority = .init(750)
             
             NSLayoutConstraint.activate([
-                view.leadingAnchor.constraint(equalTo: superview.leadingAnchor),
-                view.trailingAnchor.constraint(equalTo: superview.trailingAnchor),
-                view.topAnchor.constraint(equalTo: superview.topAnchor),
+                emptyView.leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+                emptyView.trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+                emptyView.topAnchor.constraint(equalTo: superview.topAnchor),
                 bottomAnchor,
                 heightAnchor
             ])

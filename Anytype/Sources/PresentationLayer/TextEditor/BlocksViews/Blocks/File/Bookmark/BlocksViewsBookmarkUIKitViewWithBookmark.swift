@@ -27,7 +27,6 @@ extension BlocksViews.Bookmark {
         }
         
         /// Views
-        private var contentView: UIView!
         private var titleView: UILabel!
         private var descriptionView: UILabel!
         private var iconView: UIImageView!
@@ -62,15 +61,10 @@ extension BlocksViews.Bookmark {
         func setupUIElements() {
             self.translatesAutoresizingMaskIntoConstraints = false
             
-            self.contentView = {
-                let view = UIView()
-                view.translatesAutoresizingMaskIntoConstraints = false
-                return view
-            }()
-            
             self.leftStackView = {
                 let view = UIStackView()
                 view.axis = .vertical
+                view.spacing = 5
                 view.translatesAutoresizingMaskIntoConstraints = false
                 return view
             }()
@@ -85,6 +79,7 @@ extension BlocksViews.Bookmark {
             self.titleView = {
                 let view = UILabel()
                 view.translatesAutoresizingMaskIntoConstraints = false
+                view.setContentHuggingPriority(.defaultLow, for: .vertical)
                 view.font = self.style.titleFont
                 view.textColor = self.style.titleColor
                 return view
@@ -93,6 +88,7 @@ extension BlocksViews.Bookmark {
             self.descriptionView = {
                 let view = UILabel()
                 view.translatesAutoresizingMaskIntoConstraints = false
+                view.setContentHuggingPriority(.defaultHigh, for: .vertical)
                 view.numberOfLines = 3
                 view.lineBreakMode = .byWordWrapping
                 view.font = self.style.subtitleFont
@@ -133,10 +129,8 @@ extension BlocksViews.Bookmark {
             self.leftStackView.addArrangedSubview(self.descriptionView)
             self.leftStackView.addArrangedSubview(self.urlStackView)
             
-            self.contentView.addSubview(self.leftStackView)
-            self.contentView.addSubview(self.imageView)
-            
-            self.addSubview(self.contentView)
+            addSubview(leftStackView)
+            addSubview(imageView)
             
             self.leftStackView.backgroundColor = .systemGray6
             self.imageView.backgroundColor = .systemGray2
@@ -144,15 +138,6 @@ extension BlocksViews.Bookmark {
         
         /// Layout
         func addLayout() {
-            if let view = self.contentView, let superview = view.superview {
-                NSLayoutConstraint.activate([
-                    view.leadingAnchor.constraint(equalTo: superview.leadingAnchor),
-                    view.trailingAnchor.constraint(equalTo: superview.trailingAnchor),
-                    view.topAnchor.constraint(equalTo: superview.topAnchor),
-                    view.bottomAnchor.constraint(equalTo: superview.bottomAnchor)
-                ])
-            }
-            
             if let view = self.leftStackView, let superview = view.superview {
                 NSLayoutConstraint.activate([
                     view.leadingAnchor.constraint(equalTo: superview.leadingAnchor, constant: Constants.Layout.commonInsets.left),
