@@ -1,19 +1,11 @@
-import Foundation
-import SwiftUI
 import Combine
-import os
 import BlocksModels
-import MobileCoreServices
+import UIKit
 
 final class BookmarkViewModel: BaseBlockViewModel {
     
     let imagesPublished = Resource.ImageLoader()
-    
-    private let service = BlockActionsServiceBookmark()
-    
     private var subscription: AnyCancellable?
-    
-    // MARK: - Initializers
     
     init(
         block: BlockActiveRecordModelProtocol,
@@ -42,7 +34,7 @@ final class BookmarkViewModel: BaseBlockViewModel {
                 router?.openUrl($0)
             }
         } else {
-            router?.showBookmark(model: block) { [weak self] url in
+            router?.showBookmark { [weak self] url in
                 guard let self = self else { return }
                 self.actionHandler?.handleAction(.fetch(url: url), model: self.block.blockModel)
             }
