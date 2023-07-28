@@ -15,7 +15,7 @@ final class InlineMarkdownListener: MarkdownListener {
     // MARK: - MarkdownListener
     
     func markdownChange(textView: UITextView, replacementText: String, range: NSRange) -> MarkdownChange? {
-        
+        return nil
         let replacedAttributedText = textView.attributedText.mutable
         replacedAttributedText.replaceCharacters(in: range, with: replacementText)
         

@@ -107,7 +107,7 @@ extension Array where Element == EditorItem {
     func firstIndex(blockId: BlockId) -> Int? {
         firstIndex { element in
             guard case let .block(block) = element else { return false }
-            return block.blockId == blockId
+            return block.convenientId == blockId
         }
     }
 

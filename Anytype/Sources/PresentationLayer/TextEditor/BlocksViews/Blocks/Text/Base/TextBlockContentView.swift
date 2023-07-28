@@ -43,6 +43,18 @@ final class TextBlockContentView: UIView, BlockContentView, DynamicHeightView, F
     func update(with configuration: TextBlockContentConfiguration) {
         actions = configuration.actions
         applyNewConfiguration(configuration: configuration)
+        
+        focusSubscription = configuration.focusPublisher.sink { [weak self] focus in
+            self?.textView.setFocus(focus)
+        }
+        
+        resetSubscription = configuration.resetPublisher.sink { [weak self] configuration in
+            printTimeElapsedWhenRunningCode(title: "TextBlockContentView.applyNewConfiguration") {
+                configuration.map {
+                    self?.applyNewConfiguration(configuration: $0)
+                }
+            }
+        }
     }
 
     func update(with state: UICellConfigurationState) {
@@ -56,58 +68,82 @@ final class TextBlockContentView: UIView, BlockContentView, DynamicHeightView, F
     // MARK: - Setup views
     
     private func setupLayout() {
-        contentStackView.addArrangedSubview(textBlockLeadingView)
-        contentStackView.addArrangedSubview(textView)
-
-        textView.widthAnchor.constraint(lessThanOrEqualTo: textView.widthAnchor, constant: 24).isActive = true
-
-        contentView.addSubview(contentStackView) {
-            topContentConstraint = $0.top.equal(to: contentView.topAnchor)
-            bottomContentnConstraint = $0.bottom.equal(to: contentView.bottomAnchor)
-            $0.leading.equal(to: contentView.leadingAnchor)
-            $0.trailing.equal(to: contentView.trailingAnchor)
-        }
-
-        createEmptyBlockButton.layoutUsing.anchors {
-            $0.height.equal(to: 26)
-        }
-
-        mainStackView.addArrangedSubview(contentView)
-        contentView.widthAnchor.constraint(equalTo: mainStackView.widthAnchor).isActive = true
-
-        mainStackView.addArrangedSubview(createEmptyBlockButton)
-
-        addSubview(mainStackView) {
+        addSubview(textView) {
             $0.pinToSuperview()
+            $0.height.greaterThanOrEqual(to: 40)
         }
+//        contentStackView.addArrangedSubview(textBlockLeadingView)
+//        contentStackView.addArrangedSubview(textView)
+//
+//        textView.widthAnchor.constraint(lessThanOrEqualTo: textView.widthAnchor, constant: 24).isActive = true
+//
+//        contentView.addSubview(contentStackView) {
+//            topContentConstraint = $0.top.equal(to: contentView.topAnchor)
+//            bottomContentnConstraint = $0.bottom.equal(to: contentView.bottomAnchor)
+//            $0.leading.equal(to: contentView.leadingAnchor)
+//            $0.trailing.equal(to: contentView.trailingAnchor)
+//        }
+//
+//        createEmptyBlockButton.layoutUsing.anchors {
+//            $0.height.equal(to: 26)
+//        }
+//
+//        mainStackView.addArrangedSubview(contentView)
+//        contentView.widthAnchor.constraint(equalTo: mainStackView.widthAnchor).isActive = true
+//
+//        mainStackView.addArrangedSubview(createEmptyBlockButton)
+//
+//        addSubview(mainStackView) {
+//            $0.pinToSuperview()
+//        }
     }
 
     // MARK: - Apply configuration
     
     private func applyNewConfiguration(configuration: TextBlockContentConfiguration) {
-        textView.textView.textStorage.setAttributedString(configuration.anytypeText.attrString)
-
-        let restrictions = BlockRestrictionsBuilder.build(textContentType: configuration.content.contentType)
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView.Set text") {
+            if textView.textView.textStorage != configuration.anytypeText.attrString {
+//                textView.textView = configuration.anytypeText.attrString
+                textView.textView.textStorage.setAttributedString(configuration.anytypeText.attrString)
+            }
+        }
         
-        TextBlockLeftViewStyler.applyStyle(contentStackView: contentStackView, configuration: configuration)
+        
+        
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView.Apply stype") {
+            TextBlockLeftViewStyler.applyStyle(contentStackView: contentStackView, configuration: configuration)
+        }
+        
+        
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView.Update configuration") {
+            textBlockLeadingView.update(style: .init(with: configuration))
+        }
 
-        textBlockLeadingView.update(style: .init(with: configuration))
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView.Apply style one more time") {
+            let restrictions = BlockRestrictionsBuilder.build(textContentType: configuration.content.contentType)
+            TextBlockTextViewStyler.applyStyle(textView: textView, configuration: configuration, restrictions: restrictions)
+        }
+                
 
-        TextBlockTextViewStyler.applyStyle(textView: textView, configuration: configuration, restrictions: restrictions)
-
-        updateAllConstraint(blockTextStyle: configuration.content.contentType)
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView.Contraint") {
+            updateAllConstraint(blockTextStyle: configuration.content.contentType)
+        }
+        
         
         textView.delegate = self
         
-        let displayPlaceholder = configuration.content.contentType == .toggle && configuration.shouldDisplayPlaceholder
-        createEmptyBlockButton.isHidden = !displayPlaceholder
-
-        focusSubscription = configuration.focusPublisher.sink { [weak self] focus in
-            self?.textView.setFocus(focus)
+        
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView. EmptyBlockButton") {
+            let displayPlaceholder = configuration.content.contentType == .toggle && configuration.shouldDisplayPlaceholder
+            createEmptyBlockButton.isHidden = !displayPlaceholder
         }
+        
 
-        resetSubscription = configuration.resetPublisher.sink { [weak self] configuration in
-            self?.applyNewConfiguration(configuration: configuration)
+        printTimeElapsedWhenRunningCode(title: "TextBlockContentView. isLayoutNeeded") {
+            if textView.textView.isLayoutNeeded {
+                heightDidChanged?()
+                actions?.textBlockSetNeedsLayout(textView.textView)
+            }
         }
     }
     
@@ -137,4 +173,20 @@ private extension TextBlockContentView {
         return contentStackView
     }
     
+}
+
+//func printTimeElapsedWhenRunningCode(title:String, operation:()->()) {
+//    return printTimeElapsedWhenRunningCode(title: title, operation: operation)
+//}
+
+func printTimeElapsedWhenRunningCode<T>(title:String, operation:()->(T)) -> T  {
+    let startTime = CFAbsoluteTimeGetCurrent()
+    let something = operation()
+    let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+    
+    if timeElapsed > 0.01 {
+        print("⚠️ Time elapsed for \(title): \(timeElapsed) s.")
+    }
+    
+    return something
 }

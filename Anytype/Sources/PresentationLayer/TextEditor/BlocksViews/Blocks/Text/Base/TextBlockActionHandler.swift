@@ -283,7 +283,7 @@ struct TextBlockActionHandler: TextBlockActionHandlerProtocol {
 
     private func textViewDidChangeText(textView: UITextView) {
         actionHandler.changeText(textView.attributedText, info: info)
-        blockDelegate?.textDidChange(data: blockDelegateData(textView: textView))
+//        blockDelegate?.textDidChange(data: blockDelegateData(textView: textView))
     }
 
     private func textViewWillBeginEditing(textView: UITextView) {
@@ -300,10 +300,10 @@ struct TextBlockActionHandler: TextBlockActionHandlerProtocol {
     }
 
     private func textViewDidChangeCaretPosition(textView: UITextView, range: NSRange) {
-        blockDelegate?.selectionDidChange(
-            data: blockDelegateData(textView: textView),
-            range: range
-        )
+//        blockDelegate?.selectionDidChange(
+//            data: blockDelegateData(textView: textView),
+//            range: range
+//        )
     }
 
     private func toggleCheckBox() {

@@ -2,40 +2,82 @@ import Combine
 import UIKit
 import Services
 
-struct TextBlockViewModel: BlockViewModelProtocol {
-    let info: BlockInformation
-
-    private let content: BlockText
-    private let anytypeText: UIKitAnytypeText
-    private let isCheckable: Bool
-    private let toggled: Bool
+final class TextBlockViewModel: BlockViewModelProtocol {
+    enum Style {
+        case none
+        case todo
+    }
+    
+    private(set) var info: BlockInformation
+    private var document: BaseDocumentProtocol
+    private var style: Style = .none
+    
+    private var content: BlockText = .empty(contentType: .text)
+    private var anytypeText: UIKitAnytypeText = .init(text: "", style: .bodyRegular, lineBreakModel: .byWordWrapping)
+    private var isCheckable: Bool = false
+    private var toggled: Bool = false
 
     private let focusSubject: PassthroughSubject<BlockFocusPosition, Never>
     private let actionHandler: TextBlockActionHandlerProtocol
-    private let customBackgroundColor: UIColor?
-
+    private var customBackgroundColor: UIColor?
+    
     var hashable: AnyHashable {
-        [info, isCheckable, toggled] as [AnyHashable]
+        [info.id] as [AnyHashable]
     }
     
+    private var cancellables = [AnyCancellable]()
+    
+    private var contentConfiguration: TextBlockContentConfiguration?
+    
     init(
-        info: BlockInformation,
-        content: BlockText,
-        anytypeText: UIKitAnytypeText,
-        isCheckable: Bool,
+        document: BaseDocumentProtocol,
+        blockInformation: BlockInformation,
+        blockInformamtionPublisher: AnyPublisher<BlockInformation, Never>,
+        stylePublisher: AnyPublisher<Style, Never>,
         focusSubject: PassthroughSubject<BlockFocusPosition, Never>,
         actionHandler: TextBlockActionHandlerProtocol,
         customBackgroundColor: UIColor? = nil
     ) {
-        self.content = content
-        self.anytypeText = anytypeText
-        self.isCheckable = isCheckable
-
-        self.toggled = info.isToggled
-        self.info = info
+        self.info = blockInformation
+        self.document = document
         self.focusSubject = focusSubject
         self.actionHandler = actionHandler
         self.customBackgroundColor = customBackgroundColor
+        
+        blockInformamtionPublisher.debounce(
+            for: .seconds(0.5),
+            scheduler: RunLoop.main
+        ).receiveOnMain().sink { [weak self] info in
+            self?.update(with: info)
+        }.store(in: &cancellables)
+        
+        stylePublisher.receiveOnMain().sink { [weak self] style in
+            self?.style = style
+        }.store(in: &cancellables)
+    }
+    
+    
+    private func update(with info: BlockInformation) {
+//        if self.info == info { return }
+        
+        guard case let .text(content) = info.content else {
+            fatalError()
+        }
+        
+        printTimeElapsedWhenRunningCode(title: "TextBlockViewModel.update(info:)") {
+            let isCheckable = content.contentType == .title ? style == .todo : false
+            let anytypeText = content.anytypeText(document: document)
+            
+            self.info = info
+            self.isCheckable = isCheckable
+            self.anytypeText = anytypeText
+            self.toggled = info.isToggled
+        }
+        
+        
+        printTimeElapsedWhenRunningCode(title: "TextBlockViewModel.resetSubject") {
+            actionHandler.resetSubject.send()
+        }
     }
 
     func set(focus: BlockFocusPosition) {
@@ -45,8 +87,12 @@ struct TextBlockViewModel: BlockViewModelProtocol {
     func didSelectRowInTableView(editorEditingState: EditorEditingState) {}
 
     func textBlockContentConfiguration() -> TextBlockContentConfiguration {
-        TextBlockContentConfiguration(
-            blockId: info.id,
+//        if let contentConfiguration = contentConfiguration {
+//            return contentConfiguration
+//        }
+//
+        let contentConfiguration = TextBlockContentConfiguration(
+            blockId: id ?? "",
             content: content,
             anytypeText: anytypeText,
             alignment: info.horizontalAlignment.asNSTextAlignment,
@@ -56,10 +102,14 @@ struct TextBlockViewModel: BlockViewModelProtocol {
             shouldDisplayPlaceholder: info.isToggled && info.childrenIds.isEmpty,
             focusPublisher: focusSubject.eraseToAnyPublisher(),
             resetPublisher: actionHandler.resetSubject
-                .map { _ in textBlockContentConfiguration() }
+                .map { [weak self] _ in self?.textBlockContentConfiguration() }
                 .eraseToAnyPublisher(),
             actions: actionHandler.textBlockActions()
         )
+        
+        
+//        self.contentConfiguration = contentConfiguration
+        return contentConfiguration
     }
     
     func makeContentConfiguration(maxWidth _ : CGFloat) -> UIContentConfiguration {

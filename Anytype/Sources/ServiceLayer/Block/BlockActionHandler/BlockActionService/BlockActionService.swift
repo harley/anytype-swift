@@ -128,8 +128,8 @@ final class BlockActionService: BlockActionServiceProtocol {
                 return
             }
             do {
-                try await self?.textService.merge(contextId: documentId, firstBlockId: previousBlock.blockId, secondBlockId: secondBlockId)
                 self?.setFocus(model: previousBlock)
+                try await self?.textService.merge(contextId: documentId, firstBlockId: previousBlock.blockId, secondBlockId: secondBlockId)
             } catch {
                 // Do not set focus to previous block
             }

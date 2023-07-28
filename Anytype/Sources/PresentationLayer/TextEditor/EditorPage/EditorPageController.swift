@@ -118,6 +118,10 @@ final class EditorPageController: UIViewController {
             self?.handleTextSelectionTouch(touch)
         }.store(in: &cancellables)
     }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
 
     private func performBlocksSelection(with touch: UITouch) {
         guard let indexPath = collectionView.indexPath(for: touch) else {

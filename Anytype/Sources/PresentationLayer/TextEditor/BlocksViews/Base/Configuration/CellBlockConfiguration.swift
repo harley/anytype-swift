@@ -24,3 +24,13 @@ struct CellBlockConfiguration<Configuration: BlockConfiguration>: UIContentConfi
     let indentationSettings: IndentationSettings?
     let dragConfiguration: BlockDragConfiguration?
 }
+
+extension CellBlockConfiguration: ReusableConfigurationProtocol {
+    var reusableIdentifier: String {
+        return Configuration.View.reusableIdentifier
+    }
+}
+
+protocol ReusableConfigurationProtocol {
+    var reusableIdentifier: String { get }
+}

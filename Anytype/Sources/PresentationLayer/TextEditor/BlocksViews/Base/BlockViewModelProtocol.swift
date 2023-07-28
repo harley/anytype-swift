@@ -5,7 +5,15 @@ import AnytypeCore
 protocol BlockViewModelProtocol:
     ContentConfigurationProvider,
     BlockInformationProvider
-{ }
+{
+    var id: BlockId? { get }
+}
+
+extension BlockViewModelProtocol {
+    var id: BlockId? { nil }
+    
+    var convenientId: BlockId { id ?? info.id }
+}
 
 protocol HashableProvier {
     var hashable: AnyHashable { get }

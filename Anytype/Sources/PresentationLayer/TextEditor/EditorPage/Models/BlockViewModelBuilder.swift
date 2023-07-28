@@ -18,6 +18,7 @@ final class BlockViewModelBuilder {
     private let audioSessionService: AudioSessionServiceProtocol
     private let infoContainer: InfoContainerProtocol
     private let tableService: BlockTableServiceProtocol
+    private let modelsHolder: EditorMainItemModelsHolder
 
     init(
         document: BaseDocumentProtocol,
@@ -32,7 +33,8 @@ final class BlockViewModelBuilder {
         detailsService: DetailsServiceProtocol,
         audioSessionService: AudioSessionServiceProtocol,
         infoContainer: InfoContainerProtocol,
-        tableService: BlockTableServiceProtocol
+        tableService: BlockTableServiceProtocol,
+        modelsHolder: EditorMainItemModelsHolder
     ) {
         self.document = document
         self.handler = handler
@@ -47,6 +49,7 @@ final class BlockViewModelBuilder {
         self.audioSessionService = audioSessionService
         self.infoContainer = infoContainer
         self.tableService = tableService
+        self.modelsHolder = modelsHolder
     }
 
     func buildEditorItems(infos: [BlockInformation]) -> [EditorItem] {
@@ -74,6 +77,10 @@ final class BlockViewModelBuilder {
     }
 
     func build(info: BlockInformation) -> BlockViewModelProtocol? {
+        if let viewModel = modelsHolder.contentProvider(for: info.id) {
+            return viewModel
+        }
+        
         switch info.content {
         case let .text(content):
             switch content.contentType {
@@ -129,12 +136,18 @@ final class BlockViewModelBuilder {
                     markdownListener: markdownListener,
                     blockDelegate: delegate
                 )
-
+                
                 return TextBlockViewModel(
-                    info: info,
-                    content: content,
-                    anytypeText: anytypeText,
-                    isCheckable: isCheckable,
+                    document: document, // TODO: Delete document dependency. Replace with AttributedTextConverter's object details provider. Or make logic more transparent.
+                    blockInformation: info,
+                    blockInformamtionPublisher: document.infoContainer
+                        .publisherFor(id: info.id)
+                        .map{ $0 ?? info }
+                        .eraseToAnyPublisher(),
+                    stylePublisher: document.detailsPublisher
+                        .receiveOnMain()
+                        .compactMap { $0.layoutValue == .todo ? .todo : .none }
+                        .eraseToAnyPublisher(),
                     focusSubject: subjectsHolder.focusSubject(for: info.id),
                     actionHandler: textBlockActionHandler
                 )

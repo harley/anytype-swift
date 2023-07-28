@@ -1294,6 +1294,7 @@
 		53FF7CB826FCDB4B00A5A592 /* ObjectActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FF7CB726FCDB4B00A5A592 /* ObjectActionsView.swift */; };
 		53FF7CBC26FDD36200A5A592 /* ObjectActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FF7CBB26FDD36200A5A592 /* ObjectActionsViewModel.swift */; };
 		53FF7CBE26FDD37D00A5A592 /* ObjectAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FF7CBD26FDD37D00A5A592 /* ObjectAction.swift */; };
+		861CFE4C2A73AE11005CF138 /* TextBlockContentViewAdditional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861CFE4B2A73AE11005CF138 /* TextBlockContentViewAdditional.swift */; };
 		861E75F62A5C03E400F18552 /* EditableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861E75F52A5C03E400F18552 /* EditableView.swift */; };
 		861E75F82A5D5A5F00F18552 /* TemplateSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861E75F72A5D5A5F00F18552 /* TemplateSelectionCoordinator.swift */; };
 		8624C8612A6E577E0065CBC0 /* EditorPageViewModelConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8624C8602A6E577E0065CBC0 /* EditorPageViewModelConfiguration.swift */; };
@@ -2860,6 +2861,7 @@
 		53FF7CB726FCDB4B00A5A592 /* ObjectActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectActionsView.swift; sourceTree = "<group>"; };
 		53FF7CBB26FDD36200A5A592 /* ObjectActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectActionsViewModel.swift; sourceTree = "<group>"; };
 		53FF7CBD26FDD37D00A5A592 /* ObjectAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectAction.swift; sourceTree = "<group>"; };
+		861CFE4B2A73AE11005CF138 /* TextBlockContentViewAdditional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBlockContentViewAdditional.swift; sourceTree = "<group>"; };
 		861E75F52A5C03E400F18552 /* EditableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableView.swift; sourceTree = "<group>"; };
 		861E75F72A5D5A5F00F18552 /* TemplateSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateSelectionCoordinator.swift; sourceTree = "<group>"; };
 		8624C8602A6E577E0065CBC0 /* EditorPageViewModelConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorPageViewModelConfiguration.swift; sourceTree = "<group>"; };
@@ -9070,6 +9072,7 @@
 				C9E939D8285390B70089CB98 /* TextBlockActionHandlerProtocol.swift */,
 				EAED57A9269F375B00374A46 /* TextBlockContentConfiguration.swift */,
 				EA45749625F8D2EB007D6C83 /* TextBlockContentView.swift */,
+				861CFE4B2A73AE11005CF138 /* TextBlockContentViewAdditional.swift */,
 				EAED57CF26A1A33500374A46 /* TextBlockContentView+TextViewDelegate.swift */,
 			);
 			path = Base;
@@ -9856,6 +9859,7 @@
 				2AA0209228D3502000321A66 /* Array+SubscriptionUpdate.swift in Sources */,
 				0A74E4FD23A90EB000B6C406 /* CreateNewProfileView.swift in Sources */,
 				3D93851726FAF46E001C137F /* MentionAssembly.swift in Sources */,
+				861CFE4C2A73AE11005CF138 /* TextBlockContentViewAdditional.swift in Sources */,
 				53F8210D26528D1A003FEB0B /* CustomTextViewDelegate.swift in Sources */,
 				12C8440426FCE92D00D64B8D /* ObjectHeaderEmptyContentView.swift in Sources */,
 				0303ECFF22D8EDAA005C552B /* AppDelegate.swift in Sources */,

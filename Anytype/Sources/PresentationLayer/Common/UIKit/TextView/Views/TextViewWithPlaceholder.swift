@@ -61,13 +61,13 @@ final class TextViewWithPlaceholder: UITextView {
         }
     }
 
-    override var typingAttributes: [NSAttributedString.Key : Any] {
-        didSet {
-            if let font = super.typingAttributes[.font] as? UIFont {
-                placeholderLabel.font = font
-            }
-        }
-    }
+//    override var typingAttributes: [NSAttributedString.Key : Any] {
+//        didSet {
+//            if let font = super.typingAttributes[.font] as? UIFont {
+//                placeholderLabel.font = font
+//            }
+//        }
+//    }
     
     override var textAlignment: NSTextAlignment {
         didSet {

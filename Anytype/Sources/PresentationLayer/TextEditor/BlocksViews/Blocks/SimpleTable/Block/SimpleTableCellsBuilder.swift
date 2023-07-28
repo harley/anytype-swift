@@ -125,18 +125,21 @@ final class SimpleTableCellsBuilder {
             },
             responderScrollViewHelper: responderScrollViewHelper
         )
+        
+        fatalError()
 
-        let viewModel = TextBlockViewModel(
-            info: information,
-            content: content,
-            anytypeText: anytypeText,
-            isCheckable: isCheckable,
-            focusSubject: focusSubjectHolder.focusSubject(for: information.id),
-            actionHandler: textBlockActionHandler,
-            customBackgroundColor: isHeaderRow ? UIColor.headerRowColor : nil
-        )
+//        let viewModel = TextBlockViewModel(
+//            info: information,
+//            content: content,
+//            anytypeText: anytypeText,
+//            isCheckable: isCheckable,
+//            focusSubject: focusSubjectHolder.focusSubject(for: information.id),
+//            actionHandler: textBlockActionHandler,
+//            customBackgroundColor: isHeaderRow ? UIColor.headerRowColor : nil
+//        )
 
-        return EditorItem.block(viewModel)
+        
+//        return EditorItem.block(viewModel)
     }
 
     private func handleKeyboardAction(table: ComputedTable, block: BlockInformation, action: CustomTextView.KeyboardAction) {

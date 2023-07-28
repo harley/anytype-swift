@@ -11,6 +11,7 @@ enum AttributedTextConverter {
         marks: Anytype_Model_Block.Content.Text.Marks,
         style: BlockText.Style
     ) -> UIKitAnytypeText {
+        return .init(text: text, style: .bodyRegular, lineBreakModel: .byWordWrapping)
         // we need parse marks as if it utf16 string
         let textUTF16 = text.utf16
         // Map attributes to our internal format.

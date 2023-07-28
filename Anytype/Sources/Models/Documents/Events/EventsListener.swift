@@ -89,20 +89,21 @@ final class EventsListener: EventsListenerProtocol {
         subscriptions.append(subscription)
     }
     
-    @MainActor
     private func handle(events: EventsBunch) {
-        let middlewareUpdates = events.middlewareEvents.compactMap(\.value).compactMap { middlewareConverter.convert($0) }
-        let localUpdates = events.localEvents.compactMap { localConverter.convert($0) }
-        let markupUpdates = [mentionMarkupEventProvider.updateMentionsEvent()].compactMap { $0 }
-        let dataSourceUpdates = events.dataSourceEvents.compactMap { localConverter.convert($0) }
-
-        var updates = middlewareUpdates + markupUpdates + localUpdates
-
-        if dataSourceUpdates.isNotEmpty {
-            updates.append(.dataSourceUpdate)
+        Task {
+            let middlewareUpdates = events.middlewareEvents.compactMap(\.value).compactMap { middlewareConverter.convert($0) }
+            let localUpdates = events.localEvents.compactMap { localConverter.convert($0) }
+            let markupUpdates = [mentionMarkupEventProvider.updateMentionsEvent()].compactMap { $0 }
+            let dataSourceUpdates = events.dataSourceEvents.compactMap { localConverter.convert($0) }
+            
+            var updates = middlewareUpdates + localUpdates
+            
+            if dataSourceUpdates.isNotEmpty {
+                updates.append(.dataSourceUpdate)
+            }
+            
+            receiveUpdates(updates)
         }
-
-        receiveUpdates(updates)
     }
     
     private func handleRelation(eventsBunch: RelationEventsBunch) {
@@ -111,17 +112,19 @@ final class EventsListener: EventsListenerProtocol {
     }
     
     private func receiveUpdates(_ updates: [DocumentUpdate]) {
-        if updates.contains(where: (\.hasUpdate)) {
-            IndentationBuilder.build(
-                container: infoContainer,
-                id: objectId
-            )
-        }
-        
-        updates
-            .filteredUpdates
-            .forEach { update in
-            onUpdateReceive?(update)
+        Task {
+            if updates.contains(where: (\.hasUpdate)) {
+                IndentationBuilder.build(
+                    container: infoContainer,
+                    id: objectId
+                )
+            }
+            
+            updates
+                .filteredUpdates
+                .forEach { update in
+                    onUpdateReceive?(update)
+                }
         }
     }
 }

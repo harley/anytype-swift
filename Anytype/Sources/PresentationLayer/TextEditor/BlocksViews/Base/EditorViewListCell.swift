@@ -1,6 +1,9 @@
 import UIKit
 
 final class EditorViewListCell: UICollectionViewListCell, CustomTypesAccessable {
+    override var reuseIdentifier: String? {
+        (contentConfiguration as? ReusableConfigurationProtocol)?.reusableIdentifier
+    }
     var isMoving: Bool = false {
         didSet {
             // Ensure that an update is performed whenever this property changes.

@@ -19,15 +19,15 @@ final class MentionMarkupEventProvider {
     }
     
     func updateMentionsEvent() -> DocumentUpdate? {
-        let blockIds = infoContainer
-            .recursiveChildren(of: objectId)
-            .compactMap { updateIfNeeded(info: $0) }
-        guard blockIds.count > 0 else { return nil }
-        
-        return .blocks(blockIds: Set(blockIds))
+            let blockIds = infoContainer
+                .recursiveChildren(of: objectId)
+                .compactMap { updateIfNeeded(info: $0) }
+            guard blockIds.count > 0 else { return nil }
+            
+            return .blocks(blockIds: Set(blockIds))
     }
     
-    func updateIfNeeded(info: BlockInformation) -> BlockId? {
+    private func updateIfNeeded(info: BlockInformation) -> BlockId? {
         guard case let .text(content) = info.content else { return nil }
         guard !content.marks.marks.isEmpty else { return nil }
         

@@ -98,26 +98,18 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     }
     
     private func handleUpdate(updateResult: DocumentUpdate) {
+        performGeneralUpdate()
+        
+        
+        return
+        
         switch updateResult {
 
         case .general:
             performGeneralUpdate()
 
         case let .details(id):
-            guard id == document.objectId else {
-                performGeneralUpdate()
-                return
-            }
-
-            let allRelationsBlockViewModel = modelsHolder.items.allRelationViewModel
-            let relationIds = allRelationsBlockViewModel.map(\.blockId)
-            let diffrerence = difference(with: Set(relationIds))
-
-            guard !diffrerence.isEmpty else { return }
-            modelsHolder.applyDifference(difference: diffrerence)
-
-            guard document.isOpened else { return }
-            viewInput?.update(changes: diffrerence, allModels: modelsHolder.items)
+            return
         case let .blocks(updatedIds):
             guard !updatedIds.isEmpty else {
                 return
@@ -149,6 +141,10 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     
     private func performGeneralUpdate() {
         let models = document.children
+        
+        if models.map { $0.id } == modelsHolder.items.map { $0.id } {
+            return 
+        }
         
         let blocksViewModels = blockBuilder.buildEditorItems(infos: models)
         
@@ -195,18 +191,25 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     }
 
     private func handleGeneralUpdate(with models: [EditorItem]) {
-        let difference = modelsHolder.difference(between: models)
-        if difference.insertions.isNotEmpty {
-            modelsHolder.applyDifference(difference: difference)
-        } else {
-            modelsHolder.items = models
+        printTimeElapsedWhenRunningCode(title: "EditorPageViewModel. difference") {
+            let difference = modelsHolder.difference(between: models)
+            
+            let shouldUpdateDatasource = difference.insertions.isNotEmpty || difference.removals.isNotEmpty || modelsHolder.items.count != models.count
+            
+            if difference.insertions.isNotEmpty || difference.removals.isNotEmpty {
+                modelsHolder.applyDifference(difference: difference)
+            } else {
+                modelsHolder.items = models
+            }
+            
+            guard document.isOpened else { return }
+            
+            guard shouldUpdateDatasource else { return }
+            
+            viewInput?.update(changes: difference, allModels: modelsHolder.items)
+            
+            updateCursorIfNeeded()
         }
-
-        guard document.isOpened else { return }
-        
-        viewInput?.update(changes: difference, allModels: modelsHolder.items)
-
-        updateCursorIfNeeded()
     }
 
     private func updateCursorIfNeeded() {

@@ -8,13 +8,24 @@ enum EditorItem: Hashable {
     static func == (lhs: EditorItem, rhs: EditorItem) -> Bool {
         switch (lhs, rhs) {
         case let (.block(lhsBlock), .block(rhsBlock)):
-            return lhsBlock.info.id == rhsBlock.info.id
+            return lhsBlock.convenientId == rhsBlock.convenientId
         case let (.header(lhsHeader), .header(rhsHeader)):
             return lhsHeader == rhsHeader
         case let (.system(rhsSystem), .system(lhsSystem)):
             return rhsSystem.hashable == lhsSystem.hashable
         default:
             return false
+        }
+    }
+    
+    var id: String {
+        switch self {
+        case .header(let objectHeader):
+            return "objectHeader"
+        case .block(let blockViewModelProtocol):
+            return blockViewModelProtocol.convenientId
+        case .system(let systemContentConfiguationProvider):
+            return "\(systemContentConfiguationProvider.hashable.hashValue)"
         }
     }
     
