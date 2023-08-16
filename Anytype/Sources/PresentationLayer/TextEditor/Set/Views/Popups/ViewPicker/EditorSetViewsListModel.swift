@@ -3,9 +3,18 @@ import Services
 import Combine
 import AnytypeCore
 
-final class EditorSetViewPickerViewModel: ObservableObject {
-    @Published var rows: [EditorSetViewRowConfiguration] = []
+final class EditorSetViewsListModel: SetTuningsListViewModelProtocol {
+    let title = Loc.views
+    let emptyStateTitle = ""
+    
+    @Published var isEmpty: Bool = false
     @Published var disableDeletion = false
+    var rows: [EditorSetViewRowConfiguration] = [] {
+        didSet {
+            isEmpty = rows.isEmpty
+            disableDeletion = rows.count < 2
+        }
+    }
     
     private let setDocument: SetDocumentProtocol
     private var cancellable: AnyCancellable?
@@ -23,7 +32,16 @@ final class EditorSetViewPickerViewModel: ObservableObject {
         self.setup()
     }
     
-    func addButtonTapped() {
+    func list() -> AnyView {
+        EditorSetViewsList(
+            rows: rows,
+            disableDeletion: disableDeletion,
+            onDelete: delete(_:),
+            onMove: move(from:to:)
+        ).eraseToAnyView()
+    }
+    
+    func onAddButtonTap() {
         showViewTypes(nil)
     }
     
@@ -72,7 +90,6 @@ final class EditorSetViewPickerViewModel: ObservableObject {
                 }
             )
         }
-        disableDeletion = rows.count < 2
     }
     
     private func handleTap(with view: DataviewView) {

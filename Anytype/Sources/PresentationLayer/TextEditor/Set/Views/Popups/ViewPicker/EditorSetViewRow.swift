@@ -12,6 +12,9 @@ struct EditorSetViewRow: View {
             content
             editButton
         }
+        .divider()
+        .listRowSeparator(.hidden)
+        .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
     }
     
     private var content: some View {

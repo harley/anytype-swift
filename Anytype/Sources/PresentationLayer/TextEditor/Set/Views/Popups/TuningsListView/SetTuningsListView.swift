@@ -2,8 +2,9 @@ import SwiftUI
 
 protocol SetTuningsListViewModelProtocol: ObservableObject {
     var title: String { get }
-    var isEmpty: Bool { get }
     var emptyStateTitle: String { get }
+    
+    var isEmpty: Bool { get }
     
     func list() -> AnyView
     func onAddButtonTap()
@@ -35,15 +36,14 @@ struct SetTuningsListView<ViewModel: SetTuningsListViewModelProtocol>: View {
         .environment(\.editMode, $editMode)
     }
     
+    @ViewBuilder
     private var addButton: some View {
-        Group {
-            if editMode == .inactive {
-                Button {
-                    viewModel.onAddButtonTap()
-                } label: {
-                    Image(asset: .X32.plus)
-                        .foregroundColor(.Button.active)
-                }
+        if editMode == .inactive {
+            Button {
+                viewModel.onAddButtonTap()
+            } label: {
+                Image(asset: .X32.plus)
+                    .foregroundColor(.Button.active)
             }
         }
     }

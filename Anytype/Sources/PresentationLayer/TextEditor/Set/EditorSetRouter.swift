@@ -162,13 +162,13 @@ final class EditorSetRouter: EditorSetRouterProtocol {
         dataviewService: DataviewServiceProtocol,
         showViewTypes: @escaping RoutingAction<DataviewView?>)
     {
-        let viewModel = EditorSetViewPickerViewModel(
+        let viewModel = EditorSetViewsListModel(
             setDocument: setDocument,
             dataviewService: dataviewService,
             showViewTypes: showViewTypes
         )
         let vc = UIHostingController(
-            rootView: EditorSetViewPicker(viewModel: viewModel)
+            rootView: SetTuningsListView(viewModel: viewModel)
         )
         presentSheet(vc)
     }

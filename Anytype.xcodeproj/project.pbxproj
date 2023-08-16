@@ -822,7 +822,7 @@
 		2E92219D294B8B5000968750 /* DataViewBlockViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E92219C294B8B5000968750 /* DataViewBlockViewModel.swift */; };
 		2E92219F294B8CDE00968750 /* DataViewBlockConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E92219E294B8CDE00968750 /* DataViewBlockConfiguration.swift */; };
 		2E9221A1294B8D4900968750 /* DataViewBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E9221A0294B8D4900968750 /* DataViewBlockView.swift */; };
-		2E975EC72874BB18004DE574 /* EditorSetViewPickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E975EC62874BB18004DE574 /* EditorSetViewPickerViewModel.swift */; };
+		2E975EC72874BB18004DE574 /* EditorSetViewsListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E975EC62874BB18004DE574 /* EditorSetViewsListModel.swift */; };
 		2E975EC92874BBC5004DE574 /* EditorSetViewRowConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E975EC82874BBC5004DE574 /* EditorSetViewRowConfiguration.swift */; };
 		2E975EDA287C2325004DE574 /* SetFilterRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E975ED0287C2325004DE574 /* SetFilterRow.swift */; };
 		2E975EDB287C2325004DE574 /* SetFiltersListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E975ED1287C2325004DE574 /* SetFiltersListViewModel.swift */; };
@@ -977,7 +977,7 @@
 		3D44985C26D57773005A3E06 /* DismissHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D44985B26D57773005A3E06 /* DismissHandler.swift */; };
 		3D471E1F26C3B60200457DE5 /* BlockLinkState+Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D471E1E26C3B60200457DE5 /* BlockLinkState+Icon.swift */; };
 		3D4B8CE527C54FDC001A1F98 /* BlockListServiceMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D4B8CE427C54FDC001A1F98 /* BlockListServiceMock.swift */; };
-		3D513F0F27956E2B007850D5 /* EditorSetViewPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D513F0E27956E2B007850D5 /* EditorSetViewPicker.swift */; };
+		3D513F0F27956E2B007850D5 /* EditorSetViewsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D513F0E27956E2B007850D5 /* EditorSetViewsList.swift */; };
 		3D540C7B2625C9DE00A07BD8 /* EditorBrowserAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D540C7A2625C9DE00A07BD8 /* EditorBrowserAssembly.swift */; };
 		3D568FB5266A287400DC7881 /* SystemColors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D568FB4266A287400DC7881 /* SystemColors.xcassets */; };
 		3D568FC4266A714900DC7881 /* UIColor+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D568FC3266A714900DC7881 /* UIColor+Convenience.swift */; };
@@ -2303,7 +2303,7 @@
 		2E92219C294B8B5000968750 /* DataViewBlockViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataViewBlockViewModel.swift; sourceTree = "<group>"; };
 		2E92219E294B8CDE00968750 /* DataViewBlockConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataViewBlockConfiguration.swift; sourceTree = "<group>"; };
 		2E9221A0294B8D4900968750 /* DataViewBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataViewBlockView.swift; sourceTree = "<group>"; };
-		2E975EC62874BB18004DE574 /* EditorSetViewPickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSetViewPickerViewModel.swift; sourceTree = "<group>"; };
+		2E975EC62874BB18004DE574 /* EditorSetViewsListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSetViewsListModel.swift; sourceTree = "<group>"; };
 		2E975EC82874BBC5004DE574 /* EditorSetViewRowConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSetViewRowConfiguration.swift; sourceTree = "<group>"; };
 		2E975ED0287C2325004DE574 /* SetFilterRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetFilterRow.swift; sourceTree = "<group>"; };
 		2E975ED1287C2325004DE574 /* SetFiltersListViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetFiltersListViewModel.swift; sourceTree = "<group>"; };
@@ -2458,7 +2458,7 @@
 		3D44985B26D57773005A3E06 /* DismissHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissHandler.swift; sourceTree = "<group>"; };
 		3D471E1E26C3B60200457DE5 /* BlockLinkState+Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BlockLinkState+Icon.swift"; sourceTree = "<group>"; };
 		3D4B8CE427C54FDC001A1F98 /* BlockListServiceMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BlockListServiceMock.swift; path = AnyTypeTests/Markdown/Mocks/BlockListServiceMock.swift; sourceTree = SOURCE_ROOT; };
-		3D513F0E27956E2B007850D5 /* EditorSetViewPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSetViewPicker.swift; sourceTree = "<group>"; };
+		3D513F0E27956E2B007850D5 /* EditorSetViewsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSetViewsList.swift; sourceTree = "<group>"; };
 		3D540C7A2625C9DE00A07BD8 /* EditorBrowserAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorBrowserAssembly.swift; sourceTree = "<group>"; };
 		3D568FB4266A287400DC7881 /* SystemColors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SystemColors.xcassets; sourceTree = "<group>"; };
 		3D568FC3266A714900DC7881 /* UIColor+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "UIColor+Convenience.swift"; path = "Anytype/Sources/FrameworkExtensions/UIKit/UIColor+Convenience.swift"; sourceTree = SOURCE_ROOT; };
@@ -6617,8 +6617,8 @@
 		3D30412527E8D07E00FFE0EB /* ViewPicker */ = {
 			isa = PBXGroup;
 			children = (
-				3D513F0E27956E2B007850D5 /* EditorSetViewPicker.swift */,
-				2E975EC62874BB18004DE574 /* EditorSetViewPickerViewModel.swift */,
+				3D513F0E27956E2B007850D5 /* EditorSetViewsList.swift */,
+				2E975EC62874BB18004DE574 /* EditorSetViewsListModel.swift */,
 				2E975EC82874BBC5004DE574 /* EditorSetViewRowConfiguration.swift */,
 				2E37F01328C768B900337BD4 /* EditorSetViewRow.swift */,
 			);
@@ -9446,7 +9446,7 @@
 				3DB92F85264BF69900E83276 /* View+CornerRadius.swift in Sources */,
 				2A2F147C298BF16B00C0C0A0 /* EditorBrowserCoordinator.swift in Sources */,
 				530A542A269FB8FF009016AE /* AnalyticsConstants.swift in Sources */,
-				3D513F0F27956E2B007850D5 /* EditorSetViewPicker.swift in Sources */,
+				3D513F0F27956E2B007850D5 /* EditorSetViewsList.swift in Sources */,
 				12A7B6C426C3E47200544037 /* CoverGradient.swift in Sources */,
 				3DBE2404262F04AA0065E9B6 /* Binding+OnChange.swift in Sources */,
 				2A39DC4D29FBC6DF003C43A9 /* FileStorageInfoBlock.swift in Sources */,
@@ -9684,7 +9684,7 @@
 				2A00A74029D33AA7007BE598 /* TappableArea.swift in Sources */,
 				127EAC0C273A353A00C731F2 /* Relation.swift in Sources */,
 				2EFFEB9629A52537002F5859 /* SetDragAndDropView.swift in Sources */,
-				2E975EC72874BB18004DE574 /* EditorSetViewPickerViewModel.swift in Sources */,
+				2E975EC72874BB18004DE574 /* EditorSetViewsListModel.swift in Sources */,
 				1215E8B626A8610C0089AF7E /* KingfisherConfigurator.swift in Sources */,
 				2A39F3CB29ED97F3005DE8F5 /* BlockTextStyle+Analytics.swift in Sources */,
 				3D2D4C5B27BA54030070A4C6 /* Divider.swift in Sources */,

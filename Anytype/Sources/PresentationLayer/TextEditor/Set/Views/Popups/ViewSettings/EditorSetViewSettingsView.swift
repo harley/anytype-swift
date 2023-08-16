@@ -5,42 +5,31 @@ struct EditorSetViewSettingsView: View {
     @State private var editMode = EditMode.inactive
     
     var body: some View {
-        DragIndicator()
-        NavigationView {
+        VStack(spacing: 0) {
+            TitleView(
+                title: Loc.settings,
+                leftButton: { EditButtonStyled() },
+                rightButton: { addButton }
+            )
             content
         }
         .background(Color.Background.secondary)
-        .navigationViewStyle(.stack)
     }
     
     private var content: some View {
         PlainList {
             listContent
         }
-        .environment(\.editMode, $editMode)
-        
-        .navigationViewStyle(.stack)
-        .navigationBarTitleDisplayMode(.inline)
-        
         .listStyle(.plain)
         .buttonStyle(BorderlessButtonStyle())
-        
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                EditButtonStyled()
-                    .environment(\.editMode, $editMode)
-            }
-            ToolbarItem(placement: .principal) {
-                AnytypeText(Loc.settings, style: .uxTitle1Semibold, color: .Text.primary)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: {
-                    withAnimation { editMode = .inactive }
-                    model.showAddNewRelationView()
-                }) {
-                    Image(asset: .X32.plus).foregroundColor(.Button.active)
-                }
-            }
+    }
+    
+    private var addButton: some View {
+        Button {
+            model.showAddNewRelationView()
+        } label: {
+            Image(asset: .X32.plus)
+                .foregroundColor(.Button.active)
         }
     }
     
@@ -51,6 +40,7 @@ struct EditorSetViewSettingsView: View {
                 ListSectionHeaderView(title: Loc.relations)
             }
             relationsSection
+                .environment(\.editMode, $editMode)
         }
         .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
     }
