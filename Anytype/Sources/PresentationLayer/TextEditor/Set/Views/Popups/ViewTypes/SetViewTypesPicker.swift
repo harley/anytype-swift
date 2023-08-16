@@ -7,14 +7,14 @@ struct SetViewTypesPicker: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
-            InlineNavigationBar {
-                TitleView(title: Loc.SetViewTypesPicker.title)
-            } rightButton: {
-                if viewModel.hasActiveView {
-                    settingsMenu
+            TitleView(
+                title: Loc.SetViewTypesPicker.title,
+                rightButton: {
+                    if viewModel.hasActiveView {
+                        settingsMenu
+                    }
                 }
-            }
+            )
             content
             Spacer()
             button

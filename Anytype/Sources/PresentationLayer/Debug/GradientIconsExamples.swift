@@ -6,7 +6,6 @@ struct GradientIconsExamples: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: "Gradient Icons")
             content
         }

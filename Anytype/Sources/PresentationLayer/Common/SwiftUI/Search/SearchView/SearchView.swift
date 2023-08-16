@@ -11,7 +11,6 @@ struct SearchView<SearchViewModel: SearchViewModelProtocol>: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: title)
             SearchBar(text: $searchText, focused: true, placeholder: viewModel.placeholder)
             content

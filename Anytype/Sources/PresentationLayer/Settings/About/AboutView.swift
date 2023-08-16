@@ -6,7 +6,6 @@ struct AboutView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: Loc.about)
                 .onTapGesture(count: 10) {
                     model.onDebugMenuTap()

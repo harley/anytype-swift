@@ -14,6 +14,9 @@ struct SetFilterRow: View {
             content
         }
         .disabled(editMode?.wrappedValue != .inactive)
+        .divider(leadingPadding: 60)
+        .listRowSeparator(.hidden)
+        .listRowInsets(.init(top: 0, leading: 20, bottom: 0, trailing: 20))
     }
     
     private var content: some View {

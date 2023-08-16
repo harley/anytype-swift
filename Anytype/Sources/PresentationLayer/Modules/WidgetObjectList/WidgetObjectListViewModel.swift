@@ -29,7 +29,6 @@ final class WidgetObjectListViewModel: ObservableObject, OptionsItemProvider, Wi
     @Published private(set) var selectButtonText: String = ""
     @Published private(set) var showActionPanel: Bool = false
     var contentIsNotEmpty: Bool { rowDetails.contains { $0.details.isNotEmpty } }
-    var isSheet: Bool
     
     private var rowDetails: [WidgetObjectListDetailsData] = []
     private var searchText: String?
@@ -49,8 +48,7 @@ final class WidgetObjectListViewModel: ObservableObject, OptionsItemProvider, Wi
         objectActionService: ObjectActionsServiceProtocol,
         menuBuilder: WidgetObjectListMenuBuilderProtocol,
         alertOpener: AlertOpenerProtocol,
-        output: WidgetObjectListCommonModuleOutput?,
-        isSheet: Bool = false
+        output: WidgetObjectListCommonModuleOutput?
     ) {
         self.internalModel = internalModel
         self.bottomPanelManager = bottomPanelManager
@@ -58,7 +56,6 @@ final class WidgetObjectListViewModel: ObservableObject, OptionsItemProvider, Wi
         self.menuBuilder = menuBuilder
         self.alertOpener = alertOpener
         self.output = output
-        self.isSheet = isSheet
         internalModel.rowDetailsPublisher
             .receiveOnMain()
             .sink { [weak self] data in

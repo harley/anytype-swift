@@ -12,7 +12,6 @@ struct SetViewSettingsImagePreviewView: View {
     
     private var content: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: viewModel.title)
             coverSection
             relationsSection

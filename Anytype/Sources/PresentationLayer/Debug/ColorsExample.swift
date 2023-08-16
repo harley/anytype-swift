@@ -3,7 +3,6 @@ import SwiftUI
 struct ColorsExample: View {
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: "Colors")
             ScrollView {
                 VStack(spacing: 20) {

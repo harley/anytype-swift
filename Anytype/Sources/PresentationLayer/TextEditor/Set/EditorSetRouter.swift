@@ -267,8 +267,9 @@ final class EditorSetRouter: EditorSetRouterProtocol {
             router: self
         )
         let vc = UIHostingController(
-            rootView: SetSortsListView(viewModel: viewModel)
+            rootView: SetTuningsListView(viewModel: viewModel)
         )
+        
         presentSheet(vc)
     }
     
@@ -280,8 +281,9 @@ final class EditorSetRouter: EditorSetRouterProtocol {
             subscriptionDetailsStorage: subscriptionDetailsStorage
         )
         let vc = UIHostingController(
-            rootView: SetFiltersListView(viewModel: viewModel)
+            rootView: SetTuningsListView(viewModel: viewModel)
         )
+        
         presentSheet(vc)
     }
     

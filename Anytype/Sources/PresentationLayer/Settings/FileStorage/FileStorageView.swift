@@ -7,7 +7,6 @@ struct FileStorageView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: Loc.FileStorage.title)
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {

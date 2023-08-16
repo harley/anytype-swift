@@ -6,7 +6,7 @@ struct SettingsAccountView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            TitleView(title: Loc.profile)
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     profileBlock
@@ -19,12 +19,6 @@ struct SettingsAccountView: View {
         .onAppear {
             AnytypeAnalytics.instance().logEvent(AnalyticsEventsName.accountSettingsShow)
         }
-    }
-    
-    @ViewBuilder
-    private var header: some View {
-        DragIndicator()
-        TitleView(title: Loc.profile)
     }
     
     @ViewBuilder

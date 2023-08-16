@@ -14,12 +14,11 @@ struct WidgetObjectListView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                if model.isSheet {
-                    DragIndicator()
-                }
-                TitleView(title: model.title) {
-                    editButton
-                }
+                TitleView(
+                    title: model.title,
+                    rightButton: { editButton }
+                )
+    
                 SearchBar(text: $searchText, focused: false, placeholder: Loc.search)
                 content
             }
@@ -78,8 +77,7 @@ struct WidgetObjectListView: View {
         if model.contentIsNotEmpty {
             switch model.editModel {
             case .normal:
-                EditButton()
-                    .foregroundColor(Color.Button.active)
+                EditButtonStyled()
             case .editOnly:
                 Button {
                     model.onSelectAll()

@@ -8,13 +8,15 @@ struct LoginView: View {
     var body: some View {
         content
             .navigationBarBackButtonHidden(true)
-            .navigationTitle(Loc.login)
             .navigationBarTitleDisplayMode(.inline)
             .background(TransparentBackground())
             .padding(.horizontal, 16)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     backButton
+                }
+                ToolbarItem(placement: .principal) {
+                    AnytypeText(Loc.login, style: .navigationBarTitle, color: .Text.primary)
                 }
             }
             .sheet(isPresented: $model.showQrCodeView) {

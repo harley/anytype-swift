@@ -25,7 +25,6 @@ struct ObjectCoverPicker: View {
 
     private var unsplashView: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             navigationBarView
             ItemPickerGridView(
                 viewModel: UnsplashViewModel(
@@ -42,7 +41,6 @@ struct ObjectCoverPicker: View {
     
     private var galleryTabView: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             navigationBarView
             ItemPickerGridView(viewModel: CoverColorsGridViewModel { cover in
                     switch cover {

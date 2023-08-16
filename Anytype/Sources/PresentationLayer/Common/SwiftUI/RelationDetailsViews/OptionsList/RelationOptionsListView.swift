@@ -7,7 +7,6 @@ struct RelationOptionsListView: View {
     var body: some View {
         NavigationView {
             content
-                .navigationTitle(viewModel.title)
                 .navigationBarTitleDisplayMode(.inline)
                 .sheet(isPresented: $viewModel.isSearchPresented) { viewModel.makeSearchView() }
         }
@@ -25,6 +24,9 @@ struct RelationOptionsListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 addButton
+            }
+            ToolbarItem(placement: .principal) {
+                AnytypeText(viewModel.title, style: .navigationBarTitle, color: .Text.primary)
             }
         }
     }
@@ -53,8 +55,7 @@ struct RelationOptionsListView: View {
         .listStyle(.plain)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                EditButton()
-                    .foregroundColor(Color.Button.active)
+                EditButtonStyled()
                     .disabled(!viewModel.isEditable)
             }
         }

@@ -9,7 +9,6 @@ struct EditorSetViewPicker: View {
         DragIndicator()
         NavigationView {
             viewsList
-                .navigationTitle(Loc.views)
                 .navigationBarTitleDisplayMode(.inline)
                 .environment(\.editMode, $editMode)
                 .onChange(of: viewModel.rows) { newValue in
@@ -46,8 +45,10 @@ struct EditorSetViewPicker: View {
         .buttonStyle(BorderlessButtonStyle())
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                EditButton()
-                    .foregroundColor(Color.Button.active)
+                EditButtonStyled()
+            }
+            ToolbarItem(placement: .principal) {
+                AnytypeText(Loc.views, style: .navigationBarTitle, color: .Text.primary)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 addButton

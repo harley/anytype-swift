@@ -4,8 +4,17 @@ import Services
 import FloatingPanel
 import Combine
 
-final class SetFiltersListViewModel: ObservableObject {
-    @Published var rows: [SetFilterRowConfiguration] = []
+final class SetFiltersListViewModel: SetTuningsListViewModelProtocol {
+    
+    let title = Loc.EditSet.Popup.Filters.NavigationView.title
+    let emptyStateTitle = Loc.EditSet.Popup.Filters.EmptyView.title
+    
+    @Published var isEmpty: Bool = true
+    var rows: [SetFilterRowConfiguration] = [] {
+        didSet {
+            isEmpty = rows.isEmpty
+        }
+    }
     
     private let setDocument: SetDocumentProtocol
     private var cancellable: Cancellable?
@@ -28,13 +37,19 @@ final class SetFiltersListViewModel: ObservableObject {
         self.setup()
     }
     
+    func list() -> AnyView {
+        SetFiltersListView(
+            rows: rows,
+            onDelete: delete(_:)
+        ).eraseToAnyView()
+    }
 }
 
 extension SetFiltersListViewModel {
     
     // MARK: - Actions
     
-    func addButtonTapped() {
+    func onAddButtonTap() {
         let relationsDetails = setDocument.activeViewRelations(excludeRelations: [])
         router.showRelationSearch(relationsDetails: relationsDetails) { [weak self] relationDetails in
             guard let filter = self?.makeSetFilter(with: relationDetails) else {

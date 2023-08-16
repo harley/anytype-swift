@@ -23,7 +23,6 @@ struct ObjectBasicIconPicker<T: ObservableObject & ObjectIconPickerViewModelProt
     
     private var emojiTabView: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             navigationBarView
             EmojiGridView { emoji in
                 handleSelectedEmoji(emoji)

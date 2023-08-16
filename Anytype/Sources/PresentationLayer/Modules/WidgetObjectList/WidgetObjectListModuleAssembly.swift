@@ -60,7 +60,7 @@ final class WidgetObjectListModuleAssembly: WidgetObjectListModuleAssemblyProtoc
     
     func makeFiles() -> UIViewController {
         let model = WidgetObjectListFilesViewModel(subscriptionService: serviceLocator.filesSubscriptionManager())
-        return make(internalModel: model, bottomPanelManager: nil, output: nil, isSheet: true)
+        return make(internalModel: model, bottomPanelManager: nil, output: nil)
     }
     
     // MARK: - Private
@@ -68,8 +68,7 @@ final class WidgetObjectListModuleAssembly: WidgetObjectListModuleAssemblyProtoc
     private func make(
         internalModel: WidgetObjectListInternalViewModelProtocol,
         bottomPanelManager: BrowserBottomPanelManagerProtocol?,
-        output: WidgetObjectListCommonModuleOutput?,
-        isSheet: Bool = false
+        output: WidgetObjectListCommonModuleOutput?
     ) -> UIViewController {
         
         let model = WidgetObjectListViewModel(
@@ -78,8 +77,7 @@ final class WidgetObjectListModuleAssembly: WidgetObjectListModuleAssemblyProtoc
             objectActionService: serviceLocator.objectActionsService(),
             menuBuilder: WidgetObjectListMenuBuilder(),
             alertOpener: uiHelpersDI.alertOpener(),
-            output: output,
-            isSheet: isSheet
+            output: output
         )
         let view = WidgetObjectListView(model: model)
         return WidgetObjectListHostingController(model: model, rootView: view)

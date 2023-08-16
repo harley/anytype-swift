@@ -3,7 +3,6 @@ import SwiftUI
 struct ControlsExample: View {
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: "Controls")
             ScrollView {
                 VStack(alignment: .leading) {

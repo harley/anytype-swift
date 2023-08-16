@@ -10,7 +10,6 @@ struct ObjectIconExample: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: "Icons")
             ScrollView {
                 VStack(spacing: 20) {

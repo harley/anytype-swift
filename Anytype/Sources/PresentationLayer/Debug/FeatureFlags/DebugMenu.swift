@@ -14,7 +14,7 @@ struct DebugMenu: View {
     
     var body: some View {
         VStack {
-            DragIndicator()
+            Spacer.fixedHeight(16)
             AnytypeText("Debug menu 👻", style: .title, color: .Text.primary)
             ScrollView {
                 VStack(spacing: 0) {

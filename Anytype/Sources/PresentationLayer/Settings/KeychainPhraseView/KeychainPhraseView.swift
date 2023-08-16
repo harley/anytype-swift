@@ -6,8 +6,7 @@ struct KeychainPhraseView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            DragIndicator()
-            Spacer.fixedHeight(24)
+            Spacer.fixedHeight(32)
             AnytypeText(Loc.backUpYourRecoveryPhrase, style: .heading, color: .Text.primary)
             Spacer.fixedHeight(8)
             AnytypeText(Loc.Keychain.recoveryPhraseDescription, style: .uxBodyRegular, color: .Text.primary)

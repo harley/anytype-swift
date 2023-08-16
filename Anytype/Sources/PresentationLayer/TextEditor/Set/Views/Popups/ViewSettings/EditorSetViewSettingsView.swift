@@ -27,8 +27,7 @@ struct EditorSetViewSettingsView: View {
         
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                EditButton()
-                    .foregroundColor(Color.Button.active)
+                EditButtonStyled()
                     .environment(\.editMode, $editMode)
             }
             ToolbarItem(placement: .principal) {

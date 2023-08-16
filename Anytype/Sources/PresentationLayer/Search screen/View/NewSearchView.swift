@@ -8,9 +8,6 @@ struct NewSearchView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            if viewModel.style.needDragIndicator {
-                DragIndicator()
-            }
             TitleView(title: viewModel.title)
             SearchBar(text: $searchText, focused: true, placeholder: viewModel.searchPlaceholder)
             content
@@ -83,13 +80,6 @@ extension NewSearchView {
     enum Style {
         case `default`
         case embedded
-        
-        var needDragIndicator: Bool {
-            switch self {
-            case .default: return true
-            case .embedded: return false
-            }
-        }
         
         var buttonTitle: String {
             switch self {

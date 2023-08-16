@@ -7,7 +7,6 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            DragIndicator()
             TitleView(title: Loc.Settings.title)
             
             ScrollView(showsIndicators: false) {
