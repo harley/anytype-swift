@@ -65,21 +65,19 @@ struct ObjectCoverPicker: View {
     }
     
     private var navigationBarView: some View {
-        InlineNavigationBar {
-            AnytypeText(Loc.changeCover, style: .uxTitle1Semibold, color: .Text.primary)
-                .multilineTextAlignment(.center)
-        } rightButton: {
-            if viewModel.isRemoveButtonAvailable {
-                Button {
-                    viewModel.removeCover()
-                    dismiss()
-                } label: {
-                    AnytypeText(Loc.remove, style: .uxBodyRegular, color: Color.System.red)
+        TitleView(
+            title: Loc.changeCover,
+            rightButton: {
+                if viewModel.isRemoveButtonAvailable {
+                    Button {
+                        viewModel.removeCover()
+                        dismiss()
+                    } label: {
+                        AnytypeText(Loc.remove, style: .uxTitle2Regular, color: Color.System.red)
+                    }
                 }
-            } else {
-                EmptyView()
             }
-        }
+        )
     }
     
     private var tabHeaders: some View {

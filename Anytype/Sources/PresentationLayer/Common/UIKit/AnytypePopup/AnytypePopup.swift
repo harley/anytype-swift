@@ -247,7 +247,7 @@ extension AnytypePopup {
         static let bottomInset: CGFloat = 44
         static let bottomAlertInset: CGFloat = 16
         static let bottomAlertMinimumInset: CGFloat = 60
-        static let defaultConifguration: Configuration = .init(isGrabberVisible: true, dismissOnBackdropView: true)
+        static let defaultConifguration: Configuration = .init(isGrabberVisible: false, dismissOnBackdropView: true)
     }
     
 }

@@ -37,21 +37,19 @@ struct ObjectBasicIconPicker<T: ObservableObject & ObjectIconPickerViewModelProt
     }
     
     private var navigationBarView: some View {
-        InlineNavigationBar {
-            AnytypeText(Loc.changeIcon, style: .uxTitle1Semibold, color: .Text.primary)
-                .multilineTextAlignment(.center)
-        } rightButton: {
-            if viewModel.isRemoveButtonAvailable {
-                Button {
-                    viewModel.removeIcon()
-                    dismiss()
-                } label: {
-                    AnytypeText(Loc.remove, style: .uxBodyRegular, color: Color.System.red)
+        TitleView(
+            title: Loc.changeIcon,
+            rightButton: {
+                if viewModel.isRemoveButtonAvailable {
+                    Button {
+                        viewModel.removeIcon()
+                        dismiss()
+                    } label: {
+                        AnytypeText(Loc.remove, style: .uxTitle2Regular, color: Color.System.red)
+                    }
                 }
-            } else {
-                EmptyView()
             }
-        }
+        )
     }
     
     private var uploadTabView: some View {

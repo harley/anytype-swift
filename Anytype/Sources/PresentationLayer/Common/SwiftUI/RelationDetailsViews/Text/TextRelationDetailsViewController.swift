@@ -94,7 +94,7 @@ private extension TextRelationDetailsViewController {
     static func makeTitleLabel() -> UILabel {
         let titleLabel = UILabel()
         titleLabel.textColor = UIColor.Text.primary
-        titleLabel.font = AnytypeFont.uxTitle1Semibold.uiKitFont
+        titleLabel.font = AnytypeFont.navigationBarTitle.uiKitFont
         titleLabel.textAlignment = .center
         
         return titleLabel
@@ -146,7 +146,9 @@ private extension TextRelationDetailsViewController {
     func setupLayout() {
         view.addSubview(titleLabel) {
             $0.height.equal(to: Constants.titleLabelHeight)
-            $0.pinToSuperview(excluding: [.bottom])
+            $0.leading.equal(to: view.leadingAnchor)
+            $0.top.equal(to: view.topAnchor, constant: Constants.titleLabelInset)
+            $0.trailing.equal(to: view.trailingAnchor)
         }
         view.addSubview(actionStackView) {
             $0.leading.equal(to: view.leadingAnchor)
@@ -233,6 +235,7 @@ private extension TextRelationDetailsViewController {
     
     enum Constants {
         static let titleLabelHeight: CGFloat = 48
+        static let titleLabelInset: CGFloat = 8
         static let textViewMinHeight: CGFloat = 48
         static let textViewBottomInset: CGFloat = 20
         static let actionButtonTitleInset: CGFloat = 8

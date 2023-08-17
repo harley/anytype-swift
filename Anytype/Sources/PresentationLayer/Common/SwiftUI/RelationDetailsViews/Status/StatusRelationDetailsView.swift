@@ -6,11 +6,12 @@ struct StatusRelationDetailsView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            InlineNavigationBar {
-                TitleView(title: "Status")
-            } rightButton: {
-                rightButton
-            }
+            TitleView(
+                title: Loc.Relation.Format.Status.title,
+                rightButton: {
+                    rightButton
+                }
+            )
             content
             Spacer()
         }
@@ -54,7 +55,7 @@ private extension StatusRelationDetailsView {
                 viewModel.didTapClearButton()
             }
         } label: {
-            AnytypeText(Loc.clear, style: .uxBodyRegular, color: .Button.active)
+            AnytypeText(Loc.clear, style: .uxTitle2Regular, color: .Button.active)
         }
         .disabled(!viewModel.isEditable)
     }

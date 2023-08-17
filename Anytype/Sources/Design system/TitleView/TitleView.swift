@@ -6,6 +6,9 @@ struct TitleView<RightContent, LeftContent>: View where RightContent: View, Left
     let leftButton: LeftContent?
     let rightButton: RightContent?
     
+    @State private var maxWidth: CGFloat = .zero
+    private let titlePadding: CGFloat = 8
+    
     init(title: String?, @ViewBuilder leftButton: () -> LeftContent, @ViewBuilder rightButton: () -> RightContent) {
         self.title = title
         self.leftButton = leftButton()
@@ -13,17 +16,11 @@ struct TitleView<RightContent, LeftContent>: View where RightContent: View, Left
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             Spacer.fixedHeight(8)
             content
         }
         .frame(maxWidth: .infinity)
-//        .overlay(alignment: .leading, content: {
-//            leftButton
-//        })
-//        .overlay(alignment: .trailing, content: {
-//            rightButton
-//        })
         .padding(.horizontal, 16)
         .border(.orange, width: 1)
     }
@@ -38,35 +35,36 @@ struct TitleView<RightContent, LeftContent>: View where RightContent: View, Left
         }
     }
     
-    var leftView: some View {
-        Group {
-            if let leftButton {
-                leftButton
-            } else {
-                Spacer()
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
     @ViewBuilder
     var principalView: some View {
         if let title = title {
             AnytypeText(title, style: .navigationBarTitle, color: .Text.primary)
-                .frame(height: 48)
                 .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .lineLimit(1)
         }
     }
     
-    var rightView: some View {
-        Group {
-            if let rightButton {
-                rightButton
-            } else {
-                Spacer()
-            }
+    var leftView: some View {
+        HStack(spacing: 0) {
+            leftButton
+            Spacer.fixedWidth(titlePadding)
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .readSize {
+            maxWidth = max(maxWidth, $0.width)
+        }
+        .frame(width: maxWidth + titlePadding * 2, alignment: .leading)
+    }
+    
+    var rightView: some View {
+        HStack(spacing: 0) {
+            Spacer.fixedWidth(titlePadding)
+            rightButton
+        }
+        .readSize {
+            maxWidth = max(maxWidth, $0.width)
+        }
+        .frame(width: maxWidth + titlePadding * 2, alignment: .trailing)
     }
 }
 

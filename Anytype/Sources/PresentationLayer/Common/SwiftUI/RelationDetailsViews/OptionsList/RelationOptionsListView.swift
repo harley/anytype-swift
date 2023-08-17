@@ -5,12 +5,21 @@ struct RelationOptionsListView: View {
     @ObservedObject var viewModel: RelationOptionsListViewModel
             
     var body: some View {
-        NavigationView {
+        VStack(spacing: 0) {
+            TitleView(
+                title: viewModel.title,
+                leftButton: {
+                    if viewModel.selectedOptions.count > 0 {
+                        EditButtonStyled()
+                            .disabled(!viewModel.isEditable)
+                    }
+                },
+                rightButton: {
+                    addButton
+                }
+            )
             content
-                .navigationBarTitleDisplayMode(.inline)
-                .sheet(isPresented: $viewModel.isSearchPresented) { viewModel.makeSearchView() }
         }
-        .navigationViewStyle(.stack)
     }
     
     private var content: some View {
@@ -21,14 +30,7 @@ struct RelationOptionsListView: View {
                 optionsList
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                addButton
-            }
-            ToolbarItem(placement: .principal) {
-                AnytypeText(viewModel.title, style: .navigationBarTitle, color: .Text.primary)
-            }
-        }
+        .sheet(isPresented: $viewModel.isSearchPresented) { viewModel.makeSearchView() }
     }
     
     private var emptyView: some View {
@@ -53,12 +55,6 @@ struct RelationOptionsListView: View {
         }
         .padding(.bottom, 20)
         .listStyle(.plain)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                EditButtonStyled()
-                    .disabled(!viewModel.isEditable)
-            }
-        }
     }
     
 }
