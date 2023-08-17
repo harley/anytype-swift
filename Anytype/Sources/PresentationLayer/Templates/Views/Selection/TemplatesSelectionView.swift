@@ -9,7 +9,6 @@ struct TemplatesSelectionView: View {
 
     var body: some View {
         VStack {
-            Spacer.fixedHeight(8)
             navigation
             Spacer.fixedHeight(8)
             collection
@@ -18,9 +17,9 @@ struct TemplatesSelectionView: View {
     }
 
     var navigation: some View {
-        ZStack {
-            AnytypeText(Loc.TemplateSelection.selectTemplate, style: .uxTitle2Medium, color: .Text.primary)
-            HStack(spacing: 0) {
+        TitleView(
+            title: Loc.TemplateSelection.selectTemplate,
+            leftButton: {
                 Button {
                     model.isEditingState.toggle()
                 } label: {
@@ -30,7 +29,8 @@ struct TemplatesSelectionView: View {
                         color: .Button.active
                     )
                 }
-                Spacer()
+            },
+            rightButton: {
                 Button {
                     model.onAddTemplateTap()
                 } label: {
@@ -38,9 +38,7 @@ struct TemplatesSelectionView: View {
                         .tint(.Button.active)
                 }
             }
-            .padding(.leading, 16)
-            .padding(.trailing, 12)
-        }
+        )
     }
     
     var collection: some View {

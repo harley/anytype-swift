@@ -82,7 +82,7 @@ final class BottomSheetsFactory {
             popupLayout: .intrinsic,
             floatingPanelStyle: true,
             configuration: .init(
-                isGrabberVisible: true,
+                isGrabberVisible: false,
                 dismissOnBackdropView: true,
                 skipThroughGestures: false
             ),
