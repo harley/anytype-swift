@@ -6,19 +6,12 @@ struct LoginView: View {
     @Environment(\.presentationMode) @Binding private var presentationMode
     
     var body: some View {
-        content
+        VStack(spacing: 0) {
+            header
+            content
+        }
             .navigationBarBackButtonHidden(true)
-            .navigationBarTitleDisplayMode(.inline)
             .background(TransparentBackground())
-            .padding(.horizontal, 16)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    backButton
-                }
-                ToolbarItem(placement: .principal) {
-                    AnytypeText(Loc.login, style: .navigationBarTitle, color: .Text.primary)
-                }
-            }
             .sheet(isPresented: $model.showQrCodeView) {
                 QRCodeScannerView(qrCode: self.$model.entropy, error: self.$model.errorText)
             }
@@ -41,6 +34,15 @@ struct LoginView: View {
             .fitIPadToReadableContentGuide()
     }
     
+    private var header: some View {
+        TitleView(
+            title: Loc.login,
+            leftButton: {
+                backButton
+            }
+        )
+    }
+    
     private var content: some View {
         VStack(spacing: 0) {
             Spacer.fixedHeight(16)
@@ -60,6 +62,7 @@ struct LoginView: View {
             
             Spacer()
         }
+        .padding(.horizontal, 16)
     }
     
     private var buttonsBlock : some View {
