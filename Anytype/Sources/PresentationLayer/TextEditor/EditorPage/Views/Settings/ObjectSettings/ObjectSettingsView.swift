@@ -12,6 +12,8 @@ struct ObjectSettingsView: View {
     
     private var settings: some View {
         VStack(spacing: 0) {
+            Spacer.fixedHeight(8)
+            
             settingsList
 
             ObjectActionsView(viewModel: viewModel.objectActionsViewModel)
