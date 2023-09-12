@@ -22,6 +22,7 @@ public struct BlockValidator {
         let backgroundColor = restrictions.canApplyBackgroundColor ? info.backgroundColor : nil
         let horizontalAlignment = validatedAlignment(alignment: info.horizontalAlignment, restrictions: restrictions)
         
+        // Перевести на computed values если возможно
         return BlockInformation(
             id: info.id,
             content: content,

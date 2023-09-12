@@ -93,15 +93,9 @@ final class EventsListener: EventsListenerProtocol {
         Task {
             let middlewareUpdates = events.middlewareEvents.compactMap(\.value).compactMap { middlewareConverter.convert($0) }
             let localUpdates = events.localEvents.compactMap { localConverter.convert($0) }
-            let markupUpdates = [mentionMarkupEventProvider.updateMentionsEvent()].compactMap { $0 }
-            let dataSourceUpdates = events.dataSourceEvents.compactMap { localConverter.convert($0) }
             
             var updates = middlewareUpdates + localUpdates
-            
-            if dataSourceUpdates.isNotEmpty {
-                updates.append(.dataSourceUpdate)
-            }
-            
+    
             receiveUpdates(updates)
         }
     }

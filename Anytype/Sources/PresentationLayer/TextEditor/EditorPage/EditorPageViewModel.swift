@@ -100,9 +100,6 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     private func handleUpdate(updateResult: DocumentUpdate) {
         performGeneralUpdate()
         
-        
-        return
-        
         switch updateResult {
 
         case .general:

@@ -218,7 +218,7 @@ final class BlockActionHandler: BlockActionHandlerProtocol {
             
             await EventsBunch(
                 contextId: document.objectId,
-                dataSourceUpdateEvents: [.setText(blockId: info.id, text: middlewareString)]
+                localEvents: [.setText(blockId: info.id, text: middlewareString)]
             ).send()
             
             try await service.setText(contextId: document.objectId, blockId: info.id, middlewareString: middlewareString)
