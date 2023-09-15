@@ -23,6 +23,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
     private let viewId: String
     private let mode: SetViewSettingsMode
     private let subscriptionDetailsStorage: ObjectDetailsStorage
+    private let templateModulesAssembly: TemplateModulesAssemblyProtocol
     private let setViewSettingsListModuleAssembly: SetViewSettingsListModuleAssemblyProtocol
     private let setLayoutSettingsCoordinatorAssembly: SetLayoutSettingsCoordinatorAssemblyProtocol
     private let setRelationsCoordinatorAssembly: SetRelationsCoordinatorAssemblyProtocol
@@ -34,6 +35,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
         viewId: String,
         mode: SetViewSettingsMode,
         subscriptionDetailsStorage: ObjectDetailsStorage,
+        templateModulesAssembly: TemplateModulesAssemblyProtocol,
         setViewSettingsListModuleAssembly: SetViewSettingsListModuleAssemblyProtocol,
         setLayoutSettingsCoordinatorAssembly: SetLayoutSettingsCoordinatorAssemblyProtocol,
         setRelationsCoordinatorAssembly: SetRelationsCoordinatorAssemblyProtocol,
@@ -44,6 +46,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
         self.viewId = viewId
         self.mode = mode
         self.subscriptionDetailsStorage = subscriptionDetailsStorage
+        self.templateModulesAssembly = templateModulesAssembly
         self.setViewSettingsListModuleAssembly = setViewSettingsListModuleAssembly
         self.setLayoutSettingsCoordinatorAssembly = setLayoutSettingsCoordinatorAssembly
         self.setRelationsCoordinatorAssembly = setRelationsCoordinatorAssembly
@@ -70,6 +73,16 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
     
     func onDefaultTemplateTap() {
         showObjects.toggle()
+    }
+    
+    func templatesList() -> TemplatesSelectionView {
+        // может тоже перевести на viewId ?
+        let dataView = setDocument.view(by: viewId)
+        return templateModulesAssembly.buildTemplateSelection(
+            setDocument: setDocument,
+            dataView: dataView,
+            onTemplateSelection: { _ in }
+        )
     }
     
     // MARK: - Layout

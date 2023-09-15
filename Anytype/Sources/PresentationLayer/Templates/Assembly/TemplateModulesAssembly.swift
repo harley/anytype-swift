@@ -30,8 +30,8 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
                 interactor: DataviewTemplateSelectionInteractorProvider(
                     setDocument: setDocument,
                     dataView: dataView,
-                    objectTypeProvider: serviceLocator.objectTypeProvider(),
-                    subscriptionService: TemplatesSubscriptionService(subscriptionService: serviceLocator.subscriptionService()),
+                    objectTypeProvider: self.serviceLocator.objectTypeProvider(),
+                    subscriptionService: TemplatesSubscriptionService(subscriptionService: self.serviceLocator.subscriptionService()),
                     dataviewService: DataviewService(
                         objectId: setDocument.objectId,
                         blockId: nil,
@@ -39,9 +39,9 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
                     )
                 ),
                 setDocument: setDocument,
-                objectTypeProvider: serviceLocator.objectTypeProvider(),
-                templatesService: serviceLocator.templatesService,
-                toastPresenter: uiHelperDI.toastPresenter(),
+                objectTypeProvider: self.serviceLocator.objectTypeProvider(),
+                templatesService: self.serviceLocator.templatesService,
+                toastPresenter: self.uiHelperDI.toastPresenter(),
                 onTemplateSelection: onTemplateSelection
             )
         )
