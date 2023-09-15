@@ -3,7 +3,7 @@ import Services
 
 struct TemplatesSelectionView: View {
     // Popup height. Something is wrong with keyboard appearance on UIKit view. Intistic content size couldn't be calculated in FloatingPanel :/
-    static let height: CGFloat = 312
+    static let height: CGFloat = 450
 
     @ObservedObject var model: TemplatesSelectionViewModel
 
@@ -11,13 +11,13 @@ struct TemplatesSelectionView: View {
         VStack {
             Spacer.fixedHeight(8)
             navigation
-            Spacer.fixedHeight(8)
-            collection
+            objectTypeView
+            templatesView
             Spacer.fixedHeight(24)
         }
     }
 
-    var navigation: some View {
+    private var navigation: some View {
         ZStack {
             AnytypeText(Loc.TemplateSelection.selectTemplate, style: .uxTitle2Medium, color: .Text.primary)
             HStack(spacing: 0) {
@@ -43,8 +43,48 @@ struct TemplatesSelectionView: View {
         }
     }
     
-    var collection: some View {
-        ScrollView(.horizontal) {
+    private var objectTypeView: some View {
+        VStack(spacing: 0) {
+            SectionHeaderView(title: Loc.TemplateSelection.ObjectType.subtitle)
+                .padding(.horizontal, 16)
+            Spacer.fixedHeight(4)
+            objectTypesCollection
+        }
+    }
+    
+    private var objectTypesCollection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack {
+                ForEach(model.objectTypes) { item in
+                    HStack(spacing: 0) {
+                        IconView(icon: item.icon)
+                        AnytypeText(item.title, style: .uxCalloutMedium, color: .Text.primary)
+                    }
+                    .padding(.vertical, 13)
+                    .padding(.leading, 14)
+                    .padding(.trailing, 16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.Stroke.primary, lineWidth: 1)
+                    )
+                }
+            }
+            .frame(height: 48)
+            .padding(.leading, 16)
+        }
+    }
+    
+    private var templatesView: some View {
+        VStack(spacing: 0) {
+            SectionHeaderView(title: Loc.TemplateSelection.Template.subtitle)
+                .padding(.horizontal, 16)
+            Spacer.fixedHeight(4)
+            templatesCollection
+        }
+    }
+    
+    private var templatesCollection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
                 ForEach(model.templates) { item in
                     EditableView<TemplatePreview>(
@@ -55,8 +95,8 @@ struct TemplatesSelectionView: View {
                     )
                 }
             }
-            .frame(height: 232)
             .padding(.horizontal, 16)
+            .frame(height: 232)
         }
     }
 }
@@ -67,6 +107,7 @@ struct TemplatesSelectionView_Previews: PreviewProvider {
             model: .init(
                 interactor: MockTemplateSelectionInteractorProvider(),
                 setDocument: MockSetDocument(),
+                objectTypeProvider: DI.preview.serviceLocator.objectTypeProvider(),
                 templatesService: TemplatesService(),
                 toastPresenter: ToastPresenter(
                     viewControllerProvider: ViewControllerProvider(sceneWindow: UIWindow()),

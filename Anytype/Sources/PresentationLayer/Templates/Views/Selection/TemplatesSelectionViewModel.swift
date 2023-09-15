@@ -8,6 +8,7 @@ import SwiftUI
 final class TemplatesSelectionViewModel: ObservableObject {
     @Published var isEditingState = false
     @Published var templates = [TemplatePreviewViewModel]()
+    @Published var objectTypes = [ObjectTypeConfiguration]()
     
     var templateEditingHandler: RoutingAction<BlockId>?
     
@@ -19,6 +20,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
     
     private let interactor: TemplateSelectionInteractorProvider
     private let setDocument: SetDocumentProtocol
+    private let objectTypeProvider: ObjectTypeProviderProtocol
     private let templatesService: TemplatesServiceProtocol
     private let toastPresenter: ToastPresenterProtocol
     private let onTemplateSelection: (BlockId?) -> Void
@@ -27,24 +29,20 @@ final class TemplatesSelectionViewModel: ObservableObject {
     init(
         interactor: TemplateSelectionInteractorProvider,
         setDocument: SetDocumentProtocol,
+        objectTypeProvider: ObjectTypeProviderProtocol,
         templatesService: TemplatesServiceProtocol,
         toastPresenter: ToastPresenterProtocol,
         onTemplateSelection: @escaping (BlockId?) -> Void
     ) {
         self.interactor = interactor
         self.setDocument = setDocument
+        self.objectTypeProvider = objectTypeProvider
         self.templatesService = templatesService
         self.toastPresenter = toastPresenter
         self.onTemplateSelection = onTemplateSelection
         
         updateTemplatesList()
-        
-        interactor.userTemplates.sink { [weak self] templates in
-            if let userTemplates = self?.userTemplates,
-                userTemplates != templates {
-                self?.userTemplates = templates
-            }
-        }.store(in: &cancellables)
+        setupSubscriptions()
     }
     
     func onTemplateTap(model: TemplatePreviewModel) {
@@ -92,6 +90,31 @@ final class TemplatesSelectionViewModel: ObservableObject {
                 try await interactor.setDefaultTemplate(templateId: templateId)
                 toastPresenter.show(message: Loc.Templates.Popup.default)
             }
+        }
+    }
+    
+    private func setupSubscriptions() {
+        interactor.userTemplates.sink { [weak self] templates in
+            if let userTemplates = self?.userTemplates,
+                userTemplates != templates {
+                self?.userTemplates = templates
+            }
+        }.store(in: &cancellables)
+        
+        objectTypeProvider.syncPublisher.sink { [weak self] in
+            guard let self else { return }
+            updateObjectTypes(objectTypeProvider.objectTypes)
+        }.store(in: &cancellables)
+    }
+    private func updateObjectTypes(_ objectTypes: [ObjectType]) {
+        self.objectTypes = objectTypes.map { type in
+            ObjectTypeConfiguration(
+                id: type.id,
+                icon: .object(.emoji(type.iconEmoji)),
+                title: type.name,
+                isSelected: false,
+                onTap: {}
+            )
         }
     }
     
