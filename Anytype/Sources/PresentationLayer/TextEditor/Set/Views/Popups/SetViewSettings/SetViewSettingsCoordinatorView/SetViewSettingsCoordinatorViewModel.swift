@@ -13,7 +13,6 @@ protocol SetViewSettingsCoordinatorOutput: AnyObject {
 
 @MainActor
 final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettingsCoordinatorOutput {
-    @Published var showObjects = false
     @Published var showLayouts = false
     @Published var showRelations = false
     @Published var showFilters = false
@@ -23,7 +22,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
     private let viewId: String
     private let mode: SetViewSettingsMode
     private let subscriptionDetailsStorage: ObjectDetailsStorage
-    private let templateModulesAssembly: TemplateModulesAssemblyProtocol
+    private let templateSelectionCoordinator: TemplateSelectionCoordinatorProtocol
     private let setViewSettingsListModuleAssembly: SetViewSettingsListModuleAssemblyProtocol
     private let setLayoutSettingsCoordinatorAssembly: SetLayoutSettingsCoordinatorAssemblyProtocol
     private let setRelationsCoordinatorAssembly: SetRelationsCoordinatorAssemblyProtocol
@@ -35,7 +34,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
         viewId: String,
         mode: SetViewSettingsMode,
         subscriptionDetailsStorage: ObjectDetailsStorage,
-        templateModulesAssembly: TemplateModulesAssemblyProtocol,
+        templateSelectionCoordinator: TemplateSelectionCoordinatorProtocol,
         setViewSettingsListModuleAssembly: SetViewSettingsListModuleAssemblyProtocol,
         setLayoutSettingsCoordinatorAssembly: SetLayoutSettingsCoordinatorAssemblyProtocol,
         setRelationsCoordinatorAssembly: SetRelationsCoordinatorAssemblyProtocol,
@@ -46,7 +45,7 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
         self.viewId = viewId
         self.mode = mode
         self.subscriptionDetailsStorage = subscriptionDetailsStorage
-        self.templateModulesAssembly = templateModulesAssembly
+        self.templateSelectionCoordinator = templateSelectionCoordinator
         self.setViewSettingsListModuleAssembly = setViewSettingsListModuleAssembly
         self.setLayoutSettingsCoordinatorAssembly = setLayoutSettingsCoordinatorAssembly
         self.setRelationsCoordinatorAssembly = setRelationsCoordinatorAssembly
@@ -65,22 +64,23 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
     
     // MARK: - SetViewSettingsCoordinatorOutput
     
-    // MARK: - Default type
+    // MARK: - Default type / template
     
     func onDefaultObjectTap() {
-        showObjects.toggle()
+        startTemplatesSelectionFlow()
     }
     
     func onDefaultTemplateTap() {
-        showObjects.toggle()
+        startTemplatesSelectionFlow()
     }
     
-    func templatesList() -> TemplatesSelectionView {
-        // может тоже перевести на viewId ?
+    func startTemplatesSelectionFlow() {
+        // should impl different scenarious
         let dataView = setDocument.view(by: viewId)
-        return templateModulesAssembly.buildTemplateSelection(
+        templateSelectionCoordinator.showTemplatesSelection(
             setDocument: setDocument,
-            dataView: dataView,
+            dataview: dataView,
+            floatingPanelStyle: false,
             onTemplateSelection: { _ in }
         )
     }

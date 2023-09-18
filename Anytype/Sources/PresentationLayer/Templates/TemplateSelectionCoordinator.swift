@@ -8,6 +8,7 @@ protocol TemplateSelectionCoordinatorProtocol: AnyObject {
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
         dataview: DataviewView,
+        floatingPanelStyle: Bool,
         onTemplateSelection: @escaping (BlockId?) -> ()
     )
     
@@ -41,6 +42,7 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
         dataview: DataviewView,
+        floatingPanelStyle: Bool,
         onTemplateSelection: @escaping (BlockId?) -> ()
     ) {
         let view = templatesModuleAssembly.buildTemplateSelection(
@@ -70,7 +72,7 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
             popupLayout: .constantHeight(height: TemplatesSelectionView.height, floatingPanelStyle: true, needBottomInset: false))
         let popup = AnytypePopup(
             viewModel: viewModel,
-            floatingPanelStyle: true,
+            floatingPanelStyle: floatingPanelStyle,
             configuration: .init(isGrabberVisible: false, dismissOnBackdropView: true, skipThroughGestures: false)
         )
         navigationContext.present(popup)

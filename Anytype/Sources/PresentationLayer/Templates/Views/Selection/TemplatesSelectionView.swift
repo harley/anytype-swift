@@ -5,7 +5,7 @@ struct TemplatesSelectionView: View {
     // Popup height. Something is wrong with keyboard appearance on UIKit view. Intistic content size couldn't be calculated in FloatingPanel :/
     static let height: CGFloat = 450
 
-    @StateObject var model: TemplatesSelectionViewModel
+    @ObservedObject var model: TemplatesSelectionViewModel
 
     var body: some View {
         VStack {

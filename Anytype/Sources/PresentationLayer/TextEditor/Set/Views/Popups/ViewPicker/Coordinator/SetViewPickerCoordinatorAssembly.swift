@@ -8,7 +8,8 @@ protocol SetViewPickerCoordinatorAssemblyProtocol {
     func make(
         with setDocument: SetDocumentProtocol,
         subscriptionDetailsStorage: ObjectDetailsStorage,
-        showViewTypes: @escaping RoutingAction<DataviewView?>
+        showViewTypes: @escaping RoutingAction<DataviewView?>,
+        navigationContext: NavigationContextProtocol
     ) -> AnyView
 }
 
@@ -28,7 +29,8 @@ final class SetViewPickerCoordinatorAssembly: SetViewPickerCoordinatorAssemblyPr
     func make(
         with setDocument: SetDocumentProtocol,
         subscriptionDetailsStorage: ObjectDetailsStorage,
-        showViewTypes: @escaping RoutingAction<DataviewView?>
+        showViewTypes: @escaping RoutingAction<DataviewView?>,
+        navigationContext: NavigationContextProtocol
     ) -> AnyView {
         return SetViewPickerCoordinatorView(
             model: SetViewPickerCoordinatorViewModel(
@@ -36,7 +38,8 @@ final class SetViewPickerCoordinatorAssembly: SetViewPickerCoordinatorAssemblyPr
                 setViewPickerModuleAssembly: self.modulesDI.setViewPicker(),
                 setViewSettingsCoordinatorAssembly: self.coordinatorsDI.setViewSettings(),
                 subscriptionDetailsStorage: subscriptionDetailsStorage,
-                showViewTypes: showViewTypes
+                showViewTypes: showViewTypes,
+                navigationContext: navigationContext
             )
         ).eraseToAnyView()
     }

@@ -18,19 +18,22 @@ final class SetViewPickerCoordinatorViewModel: ObservableObject, SetViewPickerCo
     private let setViewSettingsCoordinatorAssembly: SetViewSettingsCoordinatorAssemblyProtocol
     private let subscriptionDetailsStorage: ObjectDetailsStorage
     private let showViewTypes: RoutingAction<DataviewView?>
+    private let navigationContext: NavigationContextProtocol
     
     init(
         setDocument: SetDocumentProtocol,
         setViewPickerModuleAssembly: SetViewPickerModuleAssemblyProtocol,
         setViewSettingsCoordinatorAssembly: SetViewSettingsCoordinatorAssemblyProtocol,
         subscriptionDetailsStorage: ObjectDetailsStorage,
-        showViewTypes: @escaping RoutingAction<DataviewView?>
+        showViewTypes: @escaping RoutingAction<DataviewView?>,
+        navigationContext: NavigationContextProtocol
     ) {
         self.setDocument = setDocument
         self.setViewPickerModuleAssembly = setViewPickerModuleAssembly
         self.setViewSettingsCoordinatorAssembly = setViewSettingsCoordinatorAssembly
         self.subscriptionDetailsStorage = subscriptionDetailsStorage
         self.showViewTypes = showViewTypes
+        self.navigationContext = navigationContext
     }
     
     func list() -> AnyView {
@@ -69,7 +72,8 @@ final class SetViewPickerCoordinatorViewModel: ObservableObject, SetViewPickerCo
             setDocument: setDocument,
             viewId: data.viewId,
             mode: data.mode,
-            subscriptionDetailsStorage: subscriptionDetailsStorage
+            subscriptionDetailsStorage: subscriptionDetailsStorage,
+            navigationContext: navigationContext
         )
     }
 }

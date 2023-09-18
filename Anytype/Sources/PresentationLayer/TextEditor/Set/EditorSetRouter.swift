@@ -145,7 +145,8 @@ final class EditorSetRouter: EditorSetRouterProtocol, ObjectSettingsCoordinatorO
             setDocument: setDocument,
             viewId: setDocument.activeView.id,
             mode: .edit,
-            subscriptionDetailsStorage: subscriptionDetailsStorage
+            subscriptionDetailsStorage: subscriptionDetailsStorage,
+            navigationContext: navigationContext
         )
         navigationContext.presentSwiftUISheetView(view: view)
     }
@@ -178,7 +179,8 @@ final class EditorSetRouter: EditorSetRouterProtocol, ObjectSettingsCoordinatorO
         let view = setViewPickerCoordinatorAssembly.make(
             with: setDocument,
             subscriptionDetailsStorage: subscriptionDetailsStorage,
-            showViewTypes: showViewTypes
+            showViewTypes: showViewTypes,
+            navigationContext: navigationContext
         )
         navigationContext.presentSwiftUISheetView(view: view)
     }
@@ -421,6 +423,7 @@ final class EditorSetRouter: EditorSetRouterProtocol, ObjectSettingsCoordinatorO
         templateSelectionCoordinator.showTemplatesSelection(
             setDocument: setDocument,
             dataview: dataview,
+            floatingPanelStyle: true,
             onTemplateSelection: onTemplateSelection
         )
     }

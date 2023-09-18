@@ -7,7 +7,8 @@ protocol SetViewSettingsCoordinatorAssemblyProtocol {
         setDocument: SetDocumentProtocol,
         viewId: String,
         mode: SetViewSettingsMode,
-        subscriptionDetailsStorage: ObjectDetailsStorage
+        subscriptionDetailsStorage: ObjectDetailsStorage,
+        navigationContext: NavigationContextProtocol
     ) -> AnyView
 }
 
@@ -28,15 +29,22 @@ final class SetViewSettingsCoordinatorAssembly: SetViewSettingsCoordinatorAssemb
         setDocument: SetDocumentProtocol,
         viewId: String,
         mode: SetViewSettingsMode,
-        subscriptionDetailsStorage: ObjectDetailsStorage
+        subscriptionDetailsStorage: ObjectDetailsStorage,
+        navigationContext: NavigationContextProtocol
     ) -> AnyView {
+        let templateSelectionCoordinator = TemplateSelectionCoordinator(
+            navigationContext: navigationContext,
+            templatesModulesAssembly: modulesDI.templatesAssembly(),
+            editorAssembly: coordinatorsDI.editor(),
+            objectSettingCoordinator: coordinatorsDI.objectSettings().make(browserController: nil)
+        )
         return SetViewSettingsCoordinatorView(
             model: SetViewSettingsCoordinatorViewModel(
                 setDocument: setDocument,
                 viewId: viewId,
                 mode: mode,
                 subscriptionDetailsStorage: subscriptionDetailsStorage,
-                templateModulesAssembly: self.modulesDI.templatesAssembly(),
+                templateSelectionCoordinator: templateSelectionCoordinator,
                 setViewSettingsListModuleAssembly: self.modulesDI.setViewSettingsList(),
                 setLayoutSettingsCoordinatorAssembly: self.coordinatorsDI.setLayoutSettings(),
                 setRelationsCoordinatorAssembly: self.coordinatorsDI.setRelations(),

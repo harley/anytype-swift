@@ -5,10 +5,6 @@ struct SetViewSettingsCoordinatorView: View {
     
     var body: some View {
         model.list()
-            .sheet(isPresented: $model.showObjects) {
-                model.templatesList()
-                    .fitPresentationDetents()
-            }
             .sheet(isPresented: $model.showLayouts) {
                 model.setLayoutSettings()
                     .mediumPresentationDetents()
