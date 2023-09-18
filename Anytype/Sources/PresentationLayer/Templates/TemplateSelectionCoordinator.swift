@@ -23,6 +23,7 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
     private let navigationContext: NavigationContextProtocol
     private let templatesModuleAssembly: TemplateModulesAssembly
     private let editorAssembly: EditorAssembly
+    private let newSearchModuleAssembly: NewSearchModuleAssemblyProtocol
     private let objectSettingCoordinator: ObjectSettingsCoordinatorProtocol
     private var handler: TemplateSelectionObjectSettingsHandler?
     
@@ -30,10 +31,12 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
         navigationContext: NavigationContextProtocol,
         templatesModulesAssembly: TemplateModulesAssembly,
         editorAssembly: EditorAssembly,
+        newSearchModuleAssembly: NewSearchModuleAssemblyProtocol,
         objectSettingCoordinator: ObjectSettingsCoordinatorProtocol
     ) {
         self.navigationContext = navigationContext
         self.templatesModuleAssembly = templatesModulesAssembly
+        self.newSearchModuleAssembly = newSearchModuleAssembly
         self.editorAssembly = editorAssembly
         self.objectSettingCoordinator = objectSettingCoordinator
     }
@@ -52,6 +55,13 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
                 navigationContext?.dismissTopPresented(animated: true) {
                     onTemplateSelection(templateId)
                 }
+            },
+            onObjectTypesSearchAction: { [weak self] in
+                self?.showTypesSearch(
+                    setDocument: setDocument,
+                    selectedObjectId: nil,
+                    onSelect: { _ in }
+                )
             }
         )
         let model = view.model
@@ -109,6 +119,26 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
         )
 
         navigationContext.present(editingTemplateViewController)
+    }
+    
+    private func showTypesSearch(
+        setDocument: SetDocumentProtocol,
+        selectedObjectId: BlockId?,
+        onSelect: @escaping (BlockId) -> ()
+    ) {
+        let view = newSearchModuleAssembly.objectTypeSearchModule(
+            title: Loc.changeType,
+            selectedObjectId: selectedObjectId,
+            excludedObjectTypeId: setDocument.details?.type,
+            showBookmark: true,
+            showSetAndCollection: true,
+            browser: nil
+        ) { [weak self] type in
+            self?.navigationContext.dismissTopPresented()
+            onSelect(type.id)
+        }
+        
+        navigationContext.presentSwiftUIView(view: view)
     }
 }
 

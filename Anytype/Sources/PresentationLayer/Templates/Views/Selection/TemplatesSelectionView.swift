@@ -52,25 +52,38 @@ struct TemplatesSelectionView: View {
         }
     }
     
+    // пофиксить отступы
     private var objectTypesCollection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
-                ForEach(model.objectTypes) { item in
-                    HStack(spacing: 0) {
-                        IconView(icon: item.icon)
-                        AnytypeText(item.title, style: .uxCalloutMedium, color: .Text.primary)
-                    }
-                    .padding(.vertical, 13)
-                    .padding(.leading, 14)
-                    .padding(.trailing, 16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.Stroke.primary, lineWidth: 1)
-                    )
+                ForEach(model.objectTypes) { config in
+                    objectTypeView(config: config)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    // надо разделить эти вьюшки все-таки
+    private func objectTypeView(config: ObjectTypeConfiguration) -> some View {
+        Button {
+            config.onTap()
+        } label: {
+            HStack(spacing: 0) {
+                IconView(icon: config.icon)
+                    .frame(width: 18, height: 18)
+                if let title = config.title {
+                    Spacer.fixedWidth(8)
+                    AnytypeText(title, style: .uxCalloutMedium, color: .Text.primary)
                 }
             }
             .frame(height: 48)
-            .padding(.leading, 16)
+            .padding(.leading, config.title.isNil ? 15 : 14)
+            .padding(.trailing, config.title.isNil ? 15 : 16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.Stroke.primary, lineWidth: 1)
+            )
         }
     }
     
@@ -113,7 +126,8 @@ struct TemplatesSelectionView_Previews: PreviewProvider {
                     viewControllerProvider: ViewControllerProvider(sceneWindow: UIWindow()),
                     keyboardHeightListener: KeyboardHeightListener()
                 ),
-                onTemplateSelection: { _ in }
+                onTemplateSelection: { _ in },
+                onObjectTypesSearchAction: { }
             )
         )
         .previewLayout(.sizeThatFits)

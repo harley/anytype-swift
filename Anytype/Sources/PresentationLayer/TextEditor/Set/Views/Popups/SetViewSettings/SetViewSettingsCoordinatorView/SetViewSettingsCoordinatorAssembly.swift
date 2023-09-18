@@ -36,6 +36,7 @@ final class SetViewSettingsCoordinatorAssembly: SetViewSettingsCoordinatorAssemb
             navigationContext: navigationContext,
             templatesModulesAssembly: modulesDI.templatesAssembly(),
             editorAssembly: coordinatorsDI.editor(),
+            newSearchModuleAssembly: modulesDI.newSearch(),
             objectSettingCoordinator: coordinatorsDI.objectSettings().make(browserController: nil)
         )
         return SetViewSettingsCoordinatorView(

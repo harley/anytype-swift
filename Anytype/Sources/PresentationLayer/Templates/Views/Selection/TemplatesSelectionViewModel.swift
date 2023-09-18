@@ -24,6 +24,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
     private let templatesService: TemplatesServiceProtocol
     private let toastPresenter: ToastPresenterProtocol
     private let onTemplateSelection: (BlockId?) -> Void
+    private let onObjectTypesSearchAction: () -> Void
     private var cancellables = [AnyCancellable]()
     
     init(
@@ -32,7 +33,8 @@ final class TemplatesSelectionViewModel: ObservableObject {
         objectTypeProvider: ObjectTypeProviderProtocol,
         templatesService: TemplatesServiceProtocol,
         toastPresenter: ToastPresenterProtocol,
-        onTemplateSelection: @escaping (BlockId?) -> Void
+        onTemplateSelection: @escaping (BlockId?) -> Void,
+        onObjectTypesSearchAction: @escaping () -> Void
     ) {
         self.interactor = interactor
         self.setDocument = setDocument
@@ -40,6 +42,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
         self.templatesService = templatesService
         self.toastPresenter = toastPresenter
         self.onTemplateSelection = onTemplateSelection
+        self.onObjectTypesSearchAction = onObjectTypesSearchAction
         
         updateTemplatesList()
         setupSubscriptions()
@@ -107,7 +110,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
         }.store(in: &cancellables)
     }
     private func updateObjectTypes(_ objectTypes: [ObjectType]) {
-        self.objectTypes = objectTypes.map { type in
+        var convertedObjectTypes = objectTypes.map { type in
             ObjectTypeConfiguration(
                 id: type.id,
                 icon: .object(.emoji(type.iconEmoji)),
@@ -116,6 +119,15 @@ final class TemplatesSelectionViewModel: ObservableObject {
                 onTap: {}
             )
         }
+        let searchItem = ObjectTypeConfiguration(
+            id: "Search",
+            icon: .asset(.X18.search),
+            title: nil,
+            isSelected: false,
+            onTap: onObjectTypesSearchAction
+        )
+        convertedObjectTypes.insert(searchItem, at: 0)
+        self.objectTypes = convertedObjectTypes
     }
     
     private func handleTemplateOption(
