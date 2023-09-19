@@ -1,12 +1,11 @@
 import Foundation
 import Services
 
-
-protocol ObjectTypeSubscriptionDataBuilderProtocol: AnyObject {
+protocol InstalledObjectTypesSubscriptionDataBuilderProtocol: AnyObject {
     func build() -> SubscriptionData
 }
 
-final class ObjectTypeSubscriptionDataBuilder: ObjectTypeSubscriptionDataBuilderProtocol {
+final class InstalledObjectTypesSubscriptionDataBuilder: InstalledObjectTypesSubscriptionDataBuilderProtocol {
     
     private let accountManager: AccountManagerProtocol
     
@@ -21,22 +20,21 @@ final class ObjectTypeSubscriptionDataBuilder: ObjectTypeSubscriptionDataBuilder
             relation: BundledRelationKey.name,
             type: .asc
         )
-        let filters = [
-            SearchHelper.layoutFilter([DetailsLayout.objectType]),
-            SearchHelper.workspaceId(accountManager.account.info.accountSpaceId)
-        ]
+        
+        let filters: [DataviewFilter] = .builder {
+            SearchHelper.buildFilters(
+                isArchived: false,
+                workspaceId: accountManager.account.info.accountSpaceId
+            )
+            SearchHelper.layoutFilter([DetailsLayout.objectType])
+            SearchHelper.recomendedLayoutFilter(DetailsLayout.visibleLayouts)
+        }
         
         let keys = [
             BundledRelationKey.id.rawValue,
             BundledRelationKey.name.rawValue,
             BundledRelationKey.iconEmoji.rawValue,
             BundledRelationKey.description.rawValue,
-            BundledRelationKey.isHidden.rawValue,
-            BundledRelationKey.isReadonly.rawValue,
-            BundledRelationKey.isArchived.rawValue,
-            BundledRelationKey.smartblockTypes.rawValue,
-            BundledRelationKey.sourceObject.rawValue,
-            BundledRelationKey.recommendedRelations.rawValue,
             BundledRelationKey.defaultTemplateId.rawValue
         ]
 

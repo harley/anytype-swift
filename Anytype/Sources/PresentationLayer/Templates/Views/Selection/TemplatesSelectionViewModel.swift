@@ -20,7 +20,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
     
     private let interactor: TemplateSelectionInteractorProvider
     private let setDocument: SetDocumentProtocol
-    private let objectTypeProvider: ObjectTypeProviderProtocol
+    private let installedObjectTypesProvider: InstalledObjectTypesProviderProtocol
     private let templatesService: TemplatesServiceProtocol
     private let toastPresenter: ToastPresenterProtocol
     private let onTemplateSelection: (BlockId?) -> Void
@@ -30,7 +30,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
     init(
         interactor: TemplateSelectionInteractorProvider,
         setDocument: SetDocumentProtocol,
-        objectTypeProvider: ObjectTypeProviderProtocol,
+        installedObjectTypesProvider: InstalledObjectTypesProviderProtocol,
         templatesService: TemplatesServiceProtocol,
         toastPresenter: ToastPresenterProtocol,
         onTemplateSelection: @escaping (BlockId?) -> Void,
@@ -38,7 +38,7 @@ final class TemplatesSelectionViewModel: ObservableObject {
     ) {
         self.interactor = interactor
         self.setDocument = setDocument
-        self.objectTypeProvider = objectTypeProvider
+        self.installedObjectTypesProvider = installedObjectTypesProvider
         self.templatesService = templatesService
         self.toastPresenter = toastPresenter
         self.onTemplateSelection = onTemplateSelection
@@ -96,19 +96,30 @@ final class TemplatesSelectionViewModel: ObservableObject {
         }
     }
     
+    private func startSubscription() {
+        Task { [weak self] in
+            guard let self else { return }
+            await installedObjectTypesProvider.startSubscription()
+        }
+    }
+    
     private func setupSubscriptions() {
+        // Object types
+        startSubscription()
+        installedObjectTypesProvider.objectTypesPublisher.sink { [weak self] objectTypes in
+            guard let self else { return }
+            updateObjectTypes(objectTypes)
+        }.store(in: &cancellables)
+        
+        // Templates
         interactor.userTemplates.sink { [weak self] templates in
             if let userTemplates = self?.userTemplates,
                 userTemplates != templates {
                 self?.userTemplates = templates
             }
         }.store(in: &cancellables)
-        
-        objectTypeProvider.syncPublisher.sink { [weak self] in
-            guard let self else { return }
-            updateObjectTypes(objectTypeProvider.objectTypes)
-        }.store(in: &cancellables)
     }
+    
     private func updateObjectTypes(_ objectTypes: [ObjectType]) {
         var convertedObjectTypes = objectTypes.map { type in
             ObjectTypeConfiguration(
@@ -198,6 +209,10 @@ final class TemplatesSelectionViewModel: ObservableObject {
                 )
             }
         }
+    }
+    
+    deinit {
+        installedObjectTypesProvider.stopSubscription()
     }
 }
 

@@ -41,7 +41,7 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
                     )
                 ),
                 setDocument: setDocument,
-                objectTypeProvider: self.serviceLocator.objectTypeProvider(),
+                installedObjectTypesProvider: self.serviceLocator.installedObjectTypesProvider(),
                 templatesService: self.serviceLocator.templatesService,
                 toastPresenter: self.uiHelperDI.toastPresenter(),
                 onTemplateSelection: onTemplateSelection,

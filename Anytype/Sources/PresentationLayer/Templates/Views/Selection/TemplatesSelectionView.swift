@@ -52,7 +52,6 @@ struct TemplatesSelectionView: View {
         }
     }
     
-    // пофиксить отступы
     private var objectTypesCollection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
@@ -60,7 +59,9 @@ struct TemplatesSelectionView: View {
                     objectTypeView(config: config)
                 }
             }
+            .frame(height: 48)
             .padding(.horizontal, 16)
+            .padding(.vertical, 1)
         }
     }
     
@@ -120,7 +121,7 @@ struct TemplatesSelectionView_Previews: PreviewProvider {
             model: .init(
                 interactor: MockTemplateSelectionInteractorProvider(),
                 setDocument: MockSetDocument(),
-                objectTypeProvider: DI.preview.serviceLocator.objectTypeProvider(),
+                installedObjectTypesProvider: DI.preview.serviceLocator.installedObjectTypesProvider(),
                 templatesService: TemplatesService(),
                 toastPresenter: ToastPresenter(
                     viewControllerProvider: ViewControllerProvider(sceneWindow: UIWindow()),

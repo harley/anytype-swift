@@ -870,6 +870,8 @@
 		2EB3F0212A9D1B5D00B79A3F /* SetFiltersTextViewModuleAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB3F0202A9D1B5D00B79A3F /* SetFiltersTextViewModuleAssembly.swift */; };
 		2EB3F0232A9D1CAA00B79A3F /* SetFiltersCheckboxViewModuleAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB3F0222A9D1CAA00B79A3F /* SetFiltersCheckboxViewModuleAssembly.swift */; };
 		2EB97A1B28B64CDC002BBB39 /* SetListViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB97A1A28B64CDC002BBB39 /* SetListViewCell.swift */; };
+		2EC46DCB2ABA08FE00DEA4BD /* InstalledObjectTypesSubscriptionDataBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC46DCA2ABA08FE00DEA4BD /* InstalledObjectTypesSubscriptionDataBuilder.swift */; };
+		2EC46DCD2ABA0C0500DEA4BD /* InstalledObjectTypesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC46DCC2ABA0C0500DEA4BD /* InstalledObjectTypesProvider.swift */; };
 		2EC669212A166FD1001F71BC /* JoinFlowStepOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC669202A166FD1001F71BC /* JoinFlowStepOutput.swift */; };
 		2EC669242A16755A001F71BC /* AuthCustomTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC669232A16755A001F71BC /* AuthCustomTransition.swift */; };
 		2EC7FB9F2A5EF7FD00491F99 /* LoginLoadingRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC7FB9E2A5EF7FD00491F99 /* LoginLoadingRoute.swift */; };
@@ -2429,6 +2431,8 @@
 		2EB3F0202A9D1B5D00B79A3F /* SetFiltersTextViewModuleAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFiltersTextViewModuleAssembly.swift; sourceTree = "<group>"; };
 		2EB3F0222A9D1CAA00B79A3F /* SetFiltersCheckboxViewModuleAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetFiltersCheckboxViewModuleAssembly.swift; sourceTree = "<group>"; };
 		2EB97A1A28B64CDC002BBB39 /* SetListViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetListViewCell.swift; sourceTree = "<group>"; };
+		2EC46DCA2ABA08FE00DEA4BD /* InstalledObjectTypesSubscriptionDataBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledObjectTypesSubscriptionDataBuilder.swift; sourceTree = "<group>"; };
+		2EC46DCC2ABA0C0500DEA4BD /* InstalledObjectTypesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledObjectTypesProvider.swift; sourceTree = "<group>"; };
 		2EC669202A166FD1001F71BC /* JoinFlowStepOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinFlowStepOutput.swift; sourceTree = "<group>"; };
 		2EC669232A16755A001F71BC /* AuthCustomTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCustomTransition.swift; sourceTree = "<group>"; };
 		2EC7FB9E2A5EF7FD00491F99 /* LoginLoadingRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginLoadingRoute.swift; sourceTree = "<group>"; };
@@ -6339,6 +6343,15 @@
 			path = Coordinator;
 			sourceTree = "<group>";
 		};
+		2EC46DCE2ABA145800DEA4BD /* Installed */ = {
+			isa = PBXGroup;
+			children = (
+				2EC46DCA2ABA08FE00DEA4BD /* InstalledObjectTypesSubscriptionDataBuilder.swift */,
+				2EC46DCC2ABA0C0500DEA4BD /* InstalledObjectTypesProvider.swift */,
+			);
+			path = Installed;
+			sourceTree = "<group>";
+		};
 		2EC669222A167513001F71BC /* Transition */ = {
 			isa = PBXGroup;
 			children = (
@@ -7798,6 +7811,7 @@
 		3DE8D5AE26CD76CF006F31C1 /* ObjectType */ = {
 			isa = PBXGroup;
 			children = (
+				2EC46DCE2ABA145800DEA4BD /* Installed */,
 				2A7BD6E928D85B4E008B735C /* Subscription */,
 				12E286E72849EF5D00BF64EB /* ObjectTypeProviderProtocol.swift */,
 				3DE8D5AF26CD76E2006F31C1 /* ObjectTypeProvider.swift */,
@@ -9329,6 +9343,7 @@
 				03527A0722F7A44B004F0418 /* KeychainPhraseView.swift in Sources */,
 				2A6693792A7104EA007747DD /* ObjectIconImageUsecase+Font.swift in Sources */,
 				EA4AC46B261CBDE4002E961E /* FileLoadingState.swift in Sources */,
+				2EC46DCB2ABA08FE00DEA4BD /* InstalledObjectTypesSubscriptionDataBuilder.swift in Sources */,
 				0AA00C4424CB02D400870C18 /* DividerBlockContentConfiguration.swift in Sources */,
 				3D850B9F26458CC2005805A8 /* DragIndicator.swift in Sources */,
 				2E975EDA287C2325004DE574 /* SetFilterRow.swift in Sources */,
@@ -10311,6 +10326,7 @@
 				3DB1CA5A272BEF3B000D2779 /* WallpaperPickerView.swift in Sources */,
 				539168852632DD5200AD5C5F /* StyleCellView.swift in Sources */,
 				C9BFBA8B28A12E980003D9E6 /* ShimmeringBlockView.swift in Sources */,
+				2EC46DCD2ABA0C0500DEA4BD /* InstalledObjectTypesProvider.swift in Sources */,
 				125B6ED326F235F400BCD7D6 /* SlashMenuView.swift in Sources */,
 				0AD6B24A24CF5DC00097A841 /* BlockBookmarkViewModel.swift in Sources */,
 				129C54C427FC4CF600C390C7 /* NewRelationViewModel.swift in Sources */,
