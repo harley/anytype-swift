@@ -87,6 +87,8 @@ final class SharedContentInteractor: SharedContentInteractorProtocol {
         )
         try await bookmarkService.fetchBookmarkContent(bookmarkId: newBookmark.id, url: url.absoluteString)
         
+        // Set source in relation
+        
         return newBookmark
     }
     

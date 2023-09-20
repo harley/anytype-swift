@@ -13,7 +13,7 @@ enum MarkupType: Equatable, Hashable, CaseIterable {
     case backgroundColor(UIColor)
     case link(URL?)
     case linkToObject(BlockId?)
-    case mention(MentionData)
+    case mention(MentionObject)
     case emoji(Emoji)
 
     func hash(into hasher: inout Hasher) {
@@ -36,7 +36,7 @@ enum MarkupType: Equatable, Hashable, CaseIterable {
     }
 
     static var allCases: [MarkupType] {
-        return [.bold, italic, .keyboard, .strikethrough, .underscored, .textColor(.Text.secondary), .backgroundColor(.Text.secondary), .link(nil), .linkToObject(nil), .mention(MentionData.noDetails(blockId: ""))]
+        return [.bold, italic, .keyboard, .strikethrough, .underscored, .textColor(.Text.secondary), .backgroundColor(.Text.secondary), .link(nil), .linkToObject(nil), .mention(MentionObject.noDetails(blockId: ""))]
     }
     
     func sameType(_ other: MarkupType) -> Bool {
