@@ -4,36 +4,43 @@ import SwiftProtobuf
 import UIKit
 import Kingfisher
 import AnytypeCore
+import Combine
 
 final class MentionsViewModel {
-    weak var view: MentionsView!
+    @Published private(set) var mentions = ([MentionDisplayData](), "")
+    @Published private(set) var newObjectName = ""
+    let dismissSubject = PassthroughSubject<Void, Never>()
+    
+    var onSelect: RoutingAction<MentionObject>?
     
     private let document: BaseDocumentProtocol
     private let mentionService: MentionObjectsServiceProtocol
     private let pageService: PageRepositoryProtocol
-    private let onSelect: (MentionObject) -> Void
-    
     private var searchTask: Task<(), Error>?
     private var searchString = ""
     
     init(
         document: BaseDocumentProtocol,
         mentionService: MentionObjectsServiceProtocol,
-        pageService: PageRepositoryProtocol,
-        onSelect: @escaping (MentionObject) -> Void
+        pageService: PageRepositoryProtocol
     ) {
         self.document = document
         self.mentionService = mentionService
         self.pageService = pageService
-        self.onSelect = onSelect
     }
     
     func obtainMentions(filterString: String) {
         searchString = filterString
         searchTask?.cancel()
-        searchTask = Task { @MainActor in
-            let mentions = try await mentionService.searchMentions(spaceId: document.spaceId, text: filterString, excludedObjectIds: [document.objectId])
-            view?.display(mentions.map { .mention($0) }, newObjectName: filterString)
+        searchTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            let mentions = try await mentionService.searchMentions(
+                spaceId: document.spaceId,
+                text: filterString,
+                excludedObjectIds: [document.objectId]
+            )
+            
+            self.mentions = (mentions.map { .mention($0) }, filterString)
         }
     }
     
@@ -42,8 +49,8 @@ final class MentionsViewModel {
     }
     
     func didSelectMention(_ mention: MentionObject) {
-        onSelect(mention)
-        view?.dismiss()
+        onSelect?(mention)
+        dismissSubject.send(())
     }
     
     func didSelectCreateNewMention() {
@@ -57,7 +64,9 @@ final class MentionsViewModel {
                 objectIcon: newBlockDetails.objectIconImage,
                 name: name,
                 description: nil,
-                type: nil
+                type: nil,
+                isDeleted: newBlockDetails.isDeleted,
+                isArchived: newBlockDetails.isArchived
             )
             didSelectMention(mention)
         }

@@ -63,7 +63,7 @@ final class BlockActionService: BlockActionServiceProtocol {
         range: NSRange,
         newBlockContentType: BlockText.Style
     ) {
-        Task {
+        Task { @MainActor in
             let blockId = try await textService.split(
                 contextId: documentId,
                 blockId: blockId,
@@ -71,7 +71,8 @@ final class BlockActionService: BlockActionServiceProtocol {
                 style: newBlockContentType,
                 mode: mode
             )
-            
+
+//            cursorManager.focus(at: blockId, position: .beginning)
             cursorManager.blockFocus = .init(id: blockId, position: .beginning)
         }
     }
@@ -135,8 +136,14 @@ final class BlockActionService: BlockActionServiceProtocol {
                 return
             }
             do {
+                if let textContent = previousBlock.info.textContent {
+                    self?.cursorManager.focus(
+                        at: previousBlock.blockId,
+                        position: .at(.init(location: Int(textContent.text.count), length: 0))
+                        )
+                }
                 try await self?.textService.merge(contextId: documentId, firstBlockId: previousBlock.blockId, secondBlockId: secondBlockId)
-                self?.setFocus(model: previousBlock)
+
             } catch {
                 // Do not set focus to previous block
             }
@@ -171,9 +178,7 @@ final class BlockActionService: BlockActionServiceProtocol {
     }
 
     private func setFocus(model: BlockViewModelProtocol) {
-        if case let .text(text) = model.info.content {
-            model.set(focus: .at(text.endOfTextRangeWithMention))
-        }
+        model.set(focus: .end)
     }
 }
 

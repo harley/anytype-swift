@@ -5,11 +5,14 @@ import Foundation
 import ProtobufMessages
 
 protocol KeyboardActionHandlerProtocol {
-    func handle(info: BlockInformation, currentString: NSAttributedString, action: CustomTextView.KeyboardAction)
+    func handle(
+        info: BlockInformation,
+        currentString: NSAttributedString,
+        action: CustomTextView.KeyboardAction
+    )
 }
 
 final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
-    
     private let documentId: String
     private let service: BlockActionServiceProtocol
     private let listService: BlockListServiceProtocol
@@ -33,7 +36,11 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
         self.modelsHolder = modelsHolder
     }
 
-    func handle(info: BlockInformation, currentString: NSAttributedString, action: CustomTextView.KeyboardAction) {
+    func handle(
+        info: BlockInformation,
+        currentString: NSAttributedString,
+        action: CustomTextView.KeyboardAction
+    ) {
         guard case let .text(text) = info.content else {
             anytypeAssertionFailure("Only text block may send keyboard action")
             return
@@ -64,7 +71,6 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
                 )
             }
         case let .enterInside(string, range):
-            
             service.split(
                 string,
                 blockId: info.id,
@@ -72,7 +78,8 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
                 range: range,
                 newBlockContentType: contentTypeForSplit(text.contentType, blockId: info.id)
             )
-
+            
+    
         case let .enterAtTheEnd(string, range):
             guard string.string.isNotEmpty else {
                 anytypeAssertionFailure("Empty sting in enterAtTheEnd")
@@ -112,6 +119,8 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
             return
         }
         
+        // Previous block
+        // If content -> merge previous block content + current content.
         service.merge(secondBlockId: info.id)
     }
     

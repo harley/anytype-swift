@@ -41,7 +41,10 @@ final class SimpleTableBlockViewModel: BlockViewModelProtocol {
         SimpleTableBlockContentConfiguration(
             info: info,
             dependenciesBuilder: dependenciesBuilder
-        ).cellBlockConfiguration(indentationSettings: nil, dragConfiguration: nil)
+        ).cellBlockConfiguration(
+            dragConfiguration: nil,
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
+        )
     }
 
     func didSelectRowInTableView(editorEditingState: EditorEditingState) {}

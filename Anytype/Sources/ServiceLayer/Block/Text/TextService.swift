@@ -49,11 +49,6 @@ final class TextService: TextServiceProtocol {
             $0.mode = mode
         }).invoke()
 
-        await EventsBunch(
-            contextId: contextId,
-            localEvents: [.general]
-        ).send()
-
         return response.blockID
     }
 
