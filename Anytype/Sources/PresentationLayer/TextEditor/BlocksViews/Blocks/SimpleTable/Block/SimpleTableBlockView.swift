@@ -34,7 +34,6 @@ final class SimpleTableBlockView: UIView, BlockContentView {
         let dependencies = configuration.dependenciesBuilder.buildDependenciesContainer(blockInformation: configuration.info)
 
         self.spreadsheetLayout.dataSource = dataSource
-        self.spreadsheetLayout.cacheContainer = dependencies.cacheContainer
         self.blockDelegate = dependencies.blockDelegate
         self.viewModel = dependencies.viewModel
 

@@ -4,21 +4,29 @@ import AnytypeCore
 import Foundation
 
 final class BaseDocument: BaseDocumentProtocol {
-    var updatePublisher: AnyPublisher<DocumentUpdate, Never> { updateSubject.eraseToAnyPublisher() }
+    var syncStatus: AnyPublisher<SyncStatus, Never> { $_syncStatus.eraseToAnyPublisher() }
+    @Published private var _syncStatus: SyncStatus = .unknown
+    
+    var childrenPublisher: AnyPublisher<[BlockInformation], Never> { $_children.eraseToAnyPublisher() }
+    @Published private var _children = [BlockInformation]()
+    
+    private var _resetBlocksSubject = PassthroughSubject<Set<BlockId>, Never>()
+    var resetBlocksSubject: PassthroughSubject<Set<BlockId>, Never> { _resetBlocksSubject }
+    
+    
     let objectId: BlockId
     private(set) var isOpened = false
     let forPreview: Bool
-
+    
     let infoContainer: InfoContainerProtocol = InfoContainer()
     let relationLinksStorage: RelationLinksStorageProtocol = RelationLinksStorage()
     let restrictionsContainer: ObjectRestrictionsContainer = ObjectRestrictionsContainer()
     let detailsStorage = ObjectDetailsStorage()
     
     var objectRestrictions: ObjectRestrictions { restrictionsContainer.restrinctions }
-
+    
     private let blockActionsService: BlockActionsServiceSingleProtocol
     private let eventsListener: EventsListenerProtocol
-    private let updateSubject = PassthroughSubject<DocumentUpdate, Never>()
     private let relationBuilder: RelationsBuilder
     private let relationDetailsStorage = ServiceLocator.shared.relationDetailsStorage()
     private let viewModelSetter: DocumentViewModelSetterProtocol
@@ -67,7 +75,10 @@ final class BaseDocument: BaseDocumentProtocol {
     var detailsPublisher: AnyPublisher<ObjectDetails, Never> {
         syncPublisher
             .receiveOnMain()
-            .compactMap { [weak self, objectId] in self?.detailsStorage.get(id: objectId) }
+            .compactMap { [weak self, objectId] in
+                self?.detailsStorage.get(id: objectId)
+            }
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
@@ -75,7 +86,7 @@ final class BaseDocument: BaseDocumentProtocol {
     init(objectId: BlockId, forPreview: Bool = false) {
         self.objectId = objectId
         self.forPreview = forPreview
-       
+        
         self.eventsListener = EventsListener(
             objectId: objectId,
             infoContainer: infoContainer,
@@ -103,7 +114,7 @@ final class BaseDocument: BaseDocumentProtocol {
             try await blockActionsService.close(contextId: objectId)
         }
     }
-
+    
     // MARK: - BaseDocumentProtocol
     
     var spaceId: String {
@@ -113,7 +124,6 @@ final class BaseDocument: BaseDocumentProtocol {
     @MainActor
     func open() async throws {
         if isOpened {
-            updateSubject.send(.general)
             return
         }
         guard !forPreview else {
@@ -141,68 +151,141 @@ final class BaseDocument: BaseDocumentProtocol {
         isOpened = false
     }
     
-    var children: [BlockInformation] {
-        guard let model = infoContainer.get(id: objectId) else {
-            return []
-        }
-        return model.flatChildrenTree(container: infoContainer)
+    func resetSubscriptions() {
+        subscriptions = []
+        eventsListener.stopListening()
     }
-
+    
+    var children: [BlockInformation] {
+        print("Children count in document \(_children.count)")
+        return _children
+    }
+    
     var isEmpty: Bool {
-        let filteredBlocks = children.filter { $0.isFeaturedRelations || $0.isText }
-
+        let filteredBlocks = _children.filter { $0.isFeaturedRelations || $0.isText }
+        
         if filteredBlocks.count > 0 { return false }
-        let allTextChilds = children.filter(\.isText)
-
+        let allTextChilds = _children.filter(\.isText)
+        
         if allTextChilds.count > 1 { return false }
-
+        
         return allTextChilds.first?.content.isEmpty ?? false
     }
-
+    
     // MARK: - Private methods
     private func setup() {
-        eventsListener.onUpdateReceive = { [weak self] update in
-            guard update.hasUpdate else { return }
-            guard let self = self else { return }
-            
+        eventsListener.onUpdatesReceive = { [weak self] updates in
             DispatchQueue.main.async { [weak self] in
-                self?.updateSubject.send(update)
-                self?.triggerSync()
+                self?.triggerSync(updates: updates)
             }
         }
         if !forPreview {
             eventsListener.startListening()
         }
-        
-        Publishers
-            .CombineLatest(
-                relationDetailsStorage.relationsDetailsPublisher,
-                // Depends on different objects: relation options and relation objects
-                // Subscriptions for each object will be complicated. Subscribes to any document updates.
-                updatePublisher
-            )
-            .map { [weak self] _ -> ParsedRelations in
-                guard let self = self else { return .empty }
-                return self.parsedRelations
-            }
-            .removeDuplicates()
-            .receiveOnMain()
-            .sink { [weak self] in
-                self?.parsedRelationsSubject.send($0)
-                // Update block relation when relation is deleted or installed
-                self?.updateSubject.send(.general)
-            }
-            .store(in: &subscriptions)
     }
     
-    private func triggerSync() {
+    private func reorderChilder() -> Bool {
+        guard let model = infoContainer.get(id: objectId) else {
+            return false
+        }
+        let flatten = model.flatChildrenTree(container: infoContainer)
+        
+        let isTheSame = flatten.map { $0.id } == _children.map { $0.id }
+       
+        _children = flatten
+        
+        return isTheSame
+    }
+    
+    private func triggerSync(updates: [DocumentUpdate]) {
+        
+        print("updates: triggerSync")
+        print("updates: \(updates.merged)")
+        
+        for update in updates.merged {
+            guard update.hasUpdate else { return }
+            
+            switch update {
+            case .general:
+                infoContainer.publishAllValues()
+                reorderChilder()
+            case .children(let blockIds):
+                blockIds.forEach { infoContainer.publishValue(for: $0) }
+                _resetBlocksSubject.send(blockIds)
+                
+                let shouldUpdate = reorderChilder()
+                
+            case .blocks(let blockIds):
+                blockIds.forEach { infoContainer.publishValue(for: $0) }
+                _resetBlocksSubject.send(blockIds)
+            case .unhandled(let blockIds):
+                blockIds.forEach { infoContainer.publishValue(for: $0) }
+            case .syncStatus:
+                break
+            case .details(let id):
+                if id == objectId {
+                    print("This object -> 000")
+                } else {
+                    print("Another object -> 000")
+                }
+                
+                // Document details usually updates after sync()
+                //            if objectId == id {
+                //
+                //            } // => Update documentDetails
+            }
+        }
+        
+        parsedRelationsSubject.send(parsedRelations)
+    
         sync = ()
     }
     
     private func setupView(_ model: ObjectViewModel) {
         viewModelSetter.objectViewUpdate(model)
         isOpened = true
-        updateSubject.send(.general)
-        triggerSync()
+        triggerSync(updates: [.general])
+    }
+}
+
+extension Array where Element == DocumentUpdate {
+    var merged: Self {
+        if contains(.general) { return [.general] }
+        var childIds = Set<BlockId>()
+        var blockIds = Set<BlockId>()
+        var unhandled = Set<BlockId>()
+        
+        var output = [DocumentUpdate]()
+        
+        self.forEach { update in
+            switch update {
+            case let .blocks(ids):
+                blockIds.formUnion(ids)
+            case let .children(ids):
+                childIds.formUnion(ids)
+            case let .unhandled(ids):
+                unhandled.formUnion(ids)
+            case .details, .syncStatus:
+                output.append(update)
+            case .general:
+                break
+            }
+        }
+        
+        
+        if childIds.isNotEmpty {
+            childIds.formUnion(blockIds)
+            output.append(.children(blockIds: childIds))
+        } else {
+            if blockIds.isNotEmpty {
+                output.append(.blocks(blockIds: blockIds))
+            }
+        }
+        
+        if unhandled.isNotEmpty {
+            output.append(.unhandled(blockIds: unhandled))
+        }
+        
+        return output
     }
 }

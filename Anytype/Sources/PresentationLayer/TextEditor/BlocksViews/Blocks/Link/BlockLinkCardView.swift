@@ -200,7 +200,7 @@ final class BlockLinkCardView: UIView, BlockContentView {
             
         verticalTextsStackViewHeightConstraint = verticalWrapperStackView.heightAnchor.constraint(greaterThanOrEqualToConstant: 48)
         verticalTextsStackViewHeightConstraint?.isActive = true
-        verticalTextsStackViewHeightConstraint?.priority = .defaultHigh
+//        verticalTextsStackViewHeightConstraint?.priority = .defaultHigh
     }
 }
 

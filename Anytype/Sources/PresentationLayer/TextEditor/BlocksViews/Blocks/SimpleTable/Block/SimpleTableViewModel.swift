@@ -38,14 +38,15 @@ final class SimpleTableViewModel {
     }
 
     private func setupHandlers() {
-        document.updatePublisher.sink { [weak self] update in
-            self?.handleUpdate(update: update)
-        }.store(in: &cancellables)
+        #warning("Make simple tables great again")
+//        document.updatePublisher.sink { [weak self] update in
+//            self?.handleUpdate(update: update)
+//        }.store(in: &cancellables)
     }
 
     private func handleUpdate(update: DocumentUpdate) {
         switch update {
-        case .general, .details:
+        case .general, .details, .children:
             forceUpdate(shouldApplyFocus: true)
         case .syncStatus: break
         case .blocks(let blockIds):
@@ -59,15 +60,17 @@ final class SimpleTableViewModel {
             let newItems = cellBuilder.buildItems(from: tableBlockInfo)
 
            updateDifference(newItems: newItems)
-        case .dataSourceUpdate:
-            guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
-                return
-            }
-            tableBlockInfo = newInfo
-
-            let cells = cellBuilder.buildItems(from: newInfo)
-
-            dataSource?.allModels = cells
+//        case .dataSourceUpdate:
+//            guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
+//                return
+//            }
+//            tableBlockInfo = newInfo
+//
+//            let cells = cellBuilder.buildItems(from: newInfo)
+//
+//            dataSource?.allModels = cells
+        case .unhandled(blockIds: let blockIds):
+            return
         }
 
         stateManager.checkDocumentLockField()

@@ -72,10 +72,10 @@ final class ChangeTypeAccessoryViewModel {
     }
 
     private func subscribeOnDocumentChanges() {
-        document.updatePublisher.sink { [weak self] _ in
-            Task { @MainActor [weak self] in
-                await self?.fetchSupportedTypes()
-                self?.updateSupportedTypes()
+        document.detailsPublisher.sink { [weak self] details in
+            guard let self = self else { return }
+            let filteredItems = self.allSupportedTypes.filter {
+                $0.id != details.type
             }
             
         }.store(in: &cancellables)

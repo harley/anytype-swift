@@ -2,19 +2,27 @@ import Services
 import Combine
 import UIKit
 
-struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
-    let info: BlockInformation
+final class SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
+    var focusSubject = PassthroughSubject<Services.BlockFocusPosition, Never>() //
+    var userDefinedAttributedString: NSAttributedString?
+    
+    var info: BlockInformation
 
     let showPage: (BlockId) -> Void
     let openURL: (URL) -> Void
     let showTextIconPicker: () -> Void
-    let resetSubject = PassthroughSubject<Void, Never>()
+    let resetSubject = PassthroughSubject<NSAttributedString?, Never>()
 
     private let showWaitingView: (String) -> Void
     private let hideWaitingView: () -> Void
     private let onKeyboardAction: (CustomTextView.KeyboardAction) -> Void
+    
+    
+    // TO REMOVE
     private let content: BlockText
     private let anytypeText: UIKitAnytypeText
+    
+    
     private let actionHandler: BlockActionHandlerProtocol
     // Fix retain cycle for long paste action
     private weak var pasteboardService: PasteboardServiceProtocol?
@@ -80,8 +88,13 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
         )
     }
 
-    private func blockDelegateData(textView: UITextView) -> TextBlockDelegateData {
-        .init(textView: textView, info: info, text: anytypeText, usecase: .simpleTable)
+    private func blockDelegateData(textView: UITextView) -> TextViewAccessoryConfiguration {
+        TextViewAccessoryConfiguration(
+            textView: textView,
+            contentType: info.content.type,
+            usecase: .simpleTable, output: nil
+        )
+//        .init(textView: textView, info: info, text: anytypeText, usecase: .simpleTable)
     }
 
     private func textViewShouldReplaceText(
@@ -94,7 +107,7 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
         blockDelegate?.textWillChange(changeType: changeType)
 
         if mentionDetecter.removeMentionIfNeeded(textView: textView, replacementText: replacementText) {
-            actionHandler.changeText(textView.attributedText, info: info)
+            actionHandler.changeText(textView.attributedText, blockId: info.id)
             return false
         }
 
@@ -113,10 +126,10 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
                 guard BlockRestrictionsBuilder.build(content:  info.content).canApplyTextStyle(style) else { return true }
 
                 actionHandler.turnInto(style, blockId: info.id)
-                actionHandler.changeTextForced(newText, blockId: info.id)
+//                actionHandler.cha(newText, blockId: info.id)
                 textView.setFocus(.beginning)
             case let .addBlock(type, newText):
-                actionHandler.changeTextForced(newText, blockId: info.id)
+//                actionHandler.changeTextForced(newText, blockId: info.id)
                 actionHandler.addBlock(type, blockId: info.id, blockText: newText, position: .top)
             case let .addStyle(style, newText, styleRange, focusRange):
                 actionHandler.setTextStyle(style, range: styleRange, blockId: info.id, currentText: newText)
@@ -173,7 +186,7 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
             range: range
         )
 
-        actionHandler.changeTextForced(newText, blockId: info.id)
+        actionHandler.changeText(newText, blockId: info.id)
         textView.attributedText = newText
         textView.typingAttributes = previousTypingAttributes
 
@@ -187,12 +200,12 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
             return true
         }
 
-        pasteboardService.pasteInsideBlock(focusedBlockId: info.id, range: range) {
-            showWaitingView(Loc.pasteProcessing)
-        } completion: { [weak textView] pasteResult in
+        pasteboardService.pasteInsideBlock(focusedBlockId: info.id, range: range) { [weak self] in
+            self?.showWaitingView(Loc.pasteProcessing)
+        } completion: { [weak textView, weak self] pasteResult in
             guard let textView else { return }
             defer {
-                hideWaitingView()
+                self?.hideWaitingView()
             }
 
             guard let pasteResult = pasteResult else { return }
@@ -232,26 +245,26 @@ struct SimpleTablesTextBlockActionHandler: TextBlockActionHandlerProtocol {
     private func textBlockSetNeedsLayout(textView: UITextView) { }
 
     private func textViewDidChangeText(textView: UITextView) {
-        actionHandler.changeText(textView.attributedText, info: info)
+        actionHandler.changeText(textView.attributedText, blockId: info.id)
         blockDelegate?.textDidChange(data: blockDelegateData(textView: textView))
 
         responderScrollViewHelper.textViewDidBeginEditing(textView: textView)
     }
 
     private func textViewWillBeginEditing(textView: UITextView) {
-        blockDelegate?.willBeginEditing(data: blockDelegateData(textView: textView))
+        blockDelegate?.willBeginEditing(with: blockDelegateData(textView: textView))
     }
 
     private func textViewDidBeginEditing(textView: UITextView) {
         blockDelegate?.didBeginEditing(view: textView)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            responderScrollViewHelper.textViewDidBeginEditing(textView: textView)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.responderScrollViewHelper.textViewDidBeginEditing(textView: textView)
         }
     }
 
     private func textViewDidEndEditing(textView: UITextView) {
-        blockDelegate?.didEndEditing(data: blockDelegateData(textView: textView))
+        blockDelegate?.didEndEditing(with: blockDelegateData(textView: textView))
     }
 
     private func textViewDidChangeCaretPosition(textView: UITextView, range: NSRange) {
