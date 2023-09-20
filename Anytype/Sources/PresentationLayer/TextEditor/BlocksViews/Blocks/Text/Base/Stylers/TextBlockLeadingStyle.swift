@@ -76,8 +76,10 @@ enum TextBlockLeadingStyle {
                     icomImage: Icon
                 )
             )
-        case .header, .header2, .header3, .header4, .code, .description, .text, .quote:
+        case .header, .header2, .header3, .header4, .code, .description, .text:
             self = .body
+        case .quote:
+            self = .quote
         }
     }
 }

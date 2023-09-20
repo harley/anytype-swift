@@ -28,10 +28,9 @@ struct BlockBookmarkViewModel: BlockViewModelProtocol {
             return BlockBookmarkConfiguration(
                 payload: payload,
                 backgroundColor: backgroundColor
-            )
-                .cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
+            ).cellBlockConfiguration(
+                dragConfiguration: .init(id: info.id),
+                styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
             )
         case .error:
             return emptyViewConfiguration(text: Loc.Content.Common.error, state: .error)
@@ -59,8 +58,8 @@ struct BlockBookmarkViewModel: BlockViewModelProtocol {
             text: text,
             state: state
         ).cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
-            )
+            dragConfiguration: .init(id: info.id),
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
+        )
     }
 }

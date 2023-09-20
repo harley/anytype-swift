@@ -506,7 +506,7 @@ extension EditorPageBlocksStateManager: SimpleTableSelectionHandler {
     }
 }
 
-extension EditorPageBlocksStateManager: BlockSelectionHandler {
+extension EditorPageBlocksStateManager {
     func didSelectSelection(from indexPath: IndexPath) {
         guard let blockViewModel = modelsHolder.blockViewModel(at: indexPath.row) else { return }
 

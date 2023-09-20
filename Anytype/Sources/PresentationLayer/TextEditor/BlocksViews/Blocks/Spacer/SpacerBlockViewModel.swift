@@ -3,6 +3,7 @@ import UIKit
 struct SpacerBlockViewModel: SystemContentConfiguationProvider {
     enum SpacerCase: CGFloat {
         case firstRowOffset = 14
+        case another = 15
     }
 
     func didSelectRowInTableView(editorEditingState: EditorEditingState) {}
@@ -17,7 +18,10 @@ struct SpacerBlockViewModel: SystemContentConfiguationProvider {
 
     func makeContentConfiguration(maxWidth: CGFloat) -> UIContentConfiguration {
         SpacerBlockConfiguration(spacerHeight: usage.rawValue)
-            .cellBlockConfiguration(indentationSettings: nil, dragConfiguration: nil)
+            .cellBlockConfiguration(
+                dragConfiguration: nil,
+                styleConfiguration: nil
+            )
     }
 }
 

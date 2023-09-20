@@ -23,9 +23,7 @@ final class MarkStyleModifier {
         }
         
         switch action {
-        case .mention:
-            applySingleAction(action, shouldApplyMarkup: shouldApplyMarkup, range: range)
-        case .emoji:
+        case .mention, .emoji:
             applySingleAction(action, shouldApplyMarkup: shouldApplyMarkup, range: range)
         default:
             attributedString.enumerateAttributes(in: range) { _, subrange, _ in
@@ -89,13 +87,21 @@ final class MarkStyleModifier {
         case .keyboard:
             return keyboardUpdate(with: old, shouldHaveStyle: shouldApplyMarkup)
         case .strikethrough:
-            return AttributedStringChange(
-                changeAttributes: [.strikethroughStyle : shouldApplyMarkup ? NSUnderlineStyle.single.rawValue : 0,
-                                   .strikethroughColor: UIColor.Text.primary]
-            )
-
+            if shouldApplyMarkup {
+                return AttributedStringChange(
+                    changeAttributes: [.strikethroughStyle : NSUnderlineStyle.single.rawValue,
+                                       .strikethroughColor: UIColor.Text.primary]
+                )
+            } else {
+                return AttributedStringChange(deletedKeys: [.strikethroughStyle, .strikethroughColor])
+            }
         case .underscored:
-            return AttributedStringChange(changeAttributes: [.anytypeUnderline : shouldApplyMarkup])
+            if shouldApplyMarkup {
+                return AttributedStringChange(changeAttributes: [.anytypeUnderline : true])
+            } else {
+                return AttributedStringChange(deletedKeys: [.anytypeUnderline])
+            }
+            
         case let .textColor(color):
             return AttributedStringChange(changeAttributes: [.foregroundColor : color as Any])
 
@@ -126,11 +132,11 @@ final class MarkStyleModifier {
         return AttributedStringChange(changeAttributes: [ .emoji: data ])
     }
     
-    private func mentionUpdate(data: MentionData) -> AttributedStringChange {
+    private func mentionUpdate(data: MentionObject) -> AttributedStringChange {
         let deletedStyle = data.isDeleted || data.isArchived
         
         var changeAttributes: [NSAttributedString.Key: Any] = [
-            .mention: data.blockId,
+            .mention: data.id,
             .anytypeLink: !deletedStyle
         ]
         if deletedStyle { changeAttributes[.foregroundColor] = UIColor.Text.tertiary }
@@ -138,7 +144,7 @@ final class MarkStyleModifier {
         return AttributedStringChange(changeAttributes: changeAttributes)
     }
     
-    private func addMentionIcon(data: MentionData, range: NSRange, font: AnytypeFont) {
+    private func addMentionIcon(data: MentionObject, range: NSRange, font: AnytypeFont) {
         let mentionAttributedString = attributedString.attributedSubstring(from: range)
         guard mentionAttributedString.string.isNotEmpty else {
             // Empty string is for deleted mentions
@@ -148,8 +154,11 @@ final class MarkStyleModifier {
         var iconAttributes = mentionAttributedString.attributes(at: 0, effectiveRange: nil)
         iconAttributes.removeValue(forKey: .anytypeLink) // no underline under icon
         
-        let mentionIcon = data.image
-        let mentionAttachment = IconTextAttachment(icon: mentionIcon, mentionType: font.mentionType)
+        let mentionIcon = data.objectIcon
+        let mentionAttachment = IconTextAttachment.iconTextAttachment(
+            icon: mentionIcon,
+            mentionType: font.mentionType
+        )
         let mentionAttachmentString = NSMutableAttributedString(attachment: mentionAttachment)
         mentionAttachmentString.addAttributes(iconAttributes, range: mentionAttachmentString.wholeRange)
         
@@ -166,7 +175,7 @@ final class MarkStyleModifier {
         var iconAttributes = emojiAttributedString.attributes(at: 0, effectiveRange: nil)
         iconAttributes.removeValue(forKey: .anytypeLink) // no underline under icon
         
-        let attachment = IconTextAttachment(icon: .object(.emoji(data)), mentionType: font.mentionType)
+        let attachment = IconTextAttachment.iconTextAttachment(icon: .object(.emoji(data)), mentionType: font.mentionType)
         let attachmentString = NSMutableAttributedString(attachment: attachment)
         attachmentString.addAttributes(iconAttributes, range: attachmentString.wholeRange)
         

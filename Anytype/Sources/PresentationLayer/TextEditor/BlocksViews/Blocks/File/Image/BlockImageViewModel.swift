@@ -52,10 +52,9 @@ struct BlockImageViewModel: BlockViewModelProtocol {
                 alignment: info.horizontalAlignment,
                 fileData: fileData,
                 imageViewTapHandler: didTapOpenImage
-            )
-            .cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
+            ).cellBlockConfiguration(
+                dragConfiguration: .init(id: info.id),
+                styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
             )
         }
     }
@@ -66,8 +65,8 @@ struct BlockImageViewModel: BlockViewModelProtocol {
             text: text,
             state: state
         ).cellBlockConfiguration(
-            indentationSettings: .init(with: info.configurationData),
-            dragConfiguration: .init(id: info.id)
+            dragConfiguration: .init(id: info.id),
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
         )
     }
 

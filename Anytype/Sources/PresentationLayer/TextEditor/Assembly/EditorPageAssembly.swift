@@ -30,7 +30,8 @@ final class EditorAssembly {
     ) -> UIViewController {
         buildEditorModule(browser: browser, data: data, widgetListOutput: widgetListOutput).vc
     }
-
+    
+    @MainActor
     func buildEditorModule(
         browser: EditorBrowserController?,
         data: EditorScreenData,
@@ -96,7 +97,7 @@ final class EditorAssembly {
         )
         let controller = EditorSetHostingController(objectId: data.objectId, model: model)
         let navigationContext = NavigationContext(rootViewController: browser ?? controller)
-
+        
         let router = EditorSetRouter(
             setDocument: setDocument,
             rootController: browser,
@@ -135,7 +136,7 @@ final class EditorAssembly {
     ) -> (EditorPageController, EditorPageOpenRouterProtocol) {
         let simpleTableMenuViewModel = SimpleTableMenuViewModel()
         let blocksOptionViewModel = SelectionOptionsViewModel(itemProvider: nil)
-
+        
         let blocksSelectionOverlayView = buildBlocksSelectionOverlayView(
             simleTableMenuViewModel: simpleTableMenuViewModel,
             blockOptionsViewViewModel: blocksOptionViewModel
@@ -153,6 +154,8 @@ final class EditorAssembly {
             forPreview: data.isOpenedForPreview
         )
         let navigationContext = NavigationContext(rootViewController: browser ?? controller)
+        let linkToObjectCoordinator = coordinatorsDI.linkToObject().make(browserController: browser)
+        
         let router = EditorRouter(
             rootController: browser,
             viewController: controller,
@@ -164,7 +167,7 @@ final class EditorAssembly {
             urlOpener: uiHelpersDI.urlOpener(),
             relationValueCoordinator: coordinatorsDI.relationValue().make(),
             editorPageCoordinator: coordinatorsDI.editorPage().make(browserController: browser),
-            linkToObjectCoordinator: coordinatorsDI.linkToObject().make(browserController: browser),
+            linkToObjectCoordinator: linkToObjectCoordinator,
             objectCoverPickerModuleAssembly: modulesDI.objectCoverPicker(),
             objectIconPickerModuleAssembly: modulesDI.objectIconPicker(),
             objectSettingCoordinator: coordinatorsDI.objectSettings().make(browserController: browser),
@@ -193,9 +196,10 @@ final class EditorAssembly {
                 isOpenedForPreview: data.isOpenedForPreview,
                 shouldShowTemplateSelection: data.shouldShowTemplatesOptions,
                 usecase: data.usecase
-            )
+            ),
+            linkToObjectCoordinator: linkToObjectCoordinator
         )
-
+        
         controller.viewModel = viewModel
         
         return (controller, router)
@@ -212,12 +216,13 @@ final class EditorAssembly {
         simpleTableMenuViewModel: SimpleTableMenuViewModel,
         blocksSelectionOverlayViewModel: BlocksSelectionOverlayViewModel,
         bottomNavigationManager: EditorBottomNavigationManagerProtocol,
-        configuration: EditorPageViewModelConfiguration
+        configuration: EditorPageViewModelConfiguration,
+        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol
     ) -> EditorPageViewModel {
         let modelsHolder = EditorMainItemModelsHolder()
-        let markupChanger = BlockMarkupChanger(document: document)
+        let markupChanger = BlockMarkupChanger()
         let focusSubjectHolder = FocusSubjectsHolder()
-
+        
         let cursorManager = EditorCursorManager(focusSubjectHolder: focusSubjectHolder)
         let listService = serviceLocator.blockListService()
         let blockActionService = BlockActionService(
@@ -238,19 +243,18 @@ final class EditorAssembly {
             container: document.infoContainer,
             modelsHolder: modelsHolder
         )
-
+        
         let blockTableService = BlockTableService()
         let actionHandler = BlockActionHandler(
             document: document,
             markupChanger: markupChanger,
             service: blockActionService,
             listService: listService,
-            keyboardHandler: keyboardHandler,
             blockTableService: blockTableService,
             fileService: serviceLocator.fileService(), 
             objectService: serviceLocator.objectActionsService()
         )
-
+        
         let pasteboardMiddlewareService = PasteboardMiddleService(document: document)
         let pasteboardHelper = PasteboardHelper()
         let pasteboardService = PasteboardService(document: document,
@@ -275,13 +279,8 @@ final class EditorAssembly {
         let accessoryState = AccessoryViewBuilder.accessoryState(
             actionHandler: actionHandler,
             router: router,
-            pasteboardService: pasteboardService,
             document: document,
-            onShowStyleMenu: blocksStateManager.didSelectStyleSelection(infos:),
-            onBlockSelection: actionHandler.selectBlock(info:),
-            pageService: serviceLocator.pageRepository(),
-            linkToObjectCoordinator: coordinatorsDI.linkToObject().make(browserController: browser),
-            cursorManager: cursorManager
+            searchService: serviceLocator.searchService()
         )
         
         let markdownListener = MarkdownListenerImpl(
@@ -302,7 +301,7 @@ final class EditorAssembly {
             interactor: serviceLocator.objectHeaderInteractor(objectId: document.objectId)
         )
         setupHeaderModelActions(headerModel: headerModel, using: router)
-
+        
         let responderScrollViewHelper = ResponderScrollViewHelper(scrollView: scrollView)
         
         let simpleTableDependenciesBuilder = SimpleTableDependenciesBuilder(
@@ -316,9 +315,18 @@ final class EditorAssembly {
             mainEditorSelectionManager: blocksStateManager,
             responderScrollViewHelper: responderScrollViewHelper,
             pageService: serviceLocator.pageRepository(),
-            linkToObjectCoordinator: coordinatorsDI.linkToObject().make(browserController: browser)
+            linkToObjectCoordinator: coordinatorsDI.linkToObject().make(browserController: browser),
+            searchService: serviceLocator.searchService()
         )
-
+        
+        let slashMenuActionHandler = SlashMenuActionHandler(
+            document: document,
+            actionHandler: actionHandler,
+            router: router,
+            pasteboardService: pasteboardService,
+            cursorManager: cursorManager
+        )
+        
         let blocksConverter = BlockViewModelBuilder(
             document: document,
             handler: actionHandler,
@@ -332,11 +340,19 @@ final class EditorAssembly {
             detailsService: serviceLocator.detailsService(objectId: document.objectId),
             audioSessionService: serviceLocator.audioSessionService(),
             infoContainer: document.infoContainer,
-            tableService: blockTableService
+            tableService: blockTableService,
+            objectTypeProvider: serviceLocator.objectTypeProvider(),
+            modelsHolder: modelsHolder,
+            viewInput: viewInput,
+            accessoryStateManager: accessoryState,
+            cursorManager: cursorManager,
+            keyboardActionHandler: keyboardHandler,
+            linkToObjectCoordinator: linkToObjectCoordinator,
+            markupChanger: BlockMarkupChanger(),
+            slashMenuActionHandler: slashMenuActionHandler,
+            editorPageBlocksStateManager: blocksStateManager
         )
-
-        actionHandler.blockSelectionHandler = blocksStateManager
-
+        
         blocksStateManager.blocksSelectionOverlayViewModel = blocksSelectionOverlayViewModel
         blocksStateManager.blocksOptionViewModel = blocksOptionViewModel
         
@@ -362,14 +378,14 @@ final class EditorAssembly {
             templatesSubscriptionService: serviceLocator.templatesSubscription()
         )
     }
-
+    
     private func buildBlocksSelectionOverlayView(
         simleTableMenuViewModel: SimpleTableMenuViewModel,
         blockOptionsViewViewModel: SelectionOptionsViewModel
     ) -> BlocksSelectionOverlayView {
         let blocksOptionView = SelectionOptionsView(viewModel: blockOptionsViewViewModel)
         let blocksSelectionOverlayViewModel = BlocksSelectionOverlayViewModel()
-
+        
         return BlocksSelectionOverlayView(
             viewModel: blocksSelectionOverlayViewModel,
             blocksOptionView: blocksOptionView,
@@ -397,7 +413,7 @@ final class EditorAssembly {
         let module = moduleAssembly.makeRecentOpen(bottomPanelManager: bottomPanelManager, output: output)
         return (module, nil)
     }
-
+    
     private func setsModule(browser: EditorBrowserController?, output: WidgetObjectListCommonModuleOutput?) -> (UIViewController, EditorPageOpenRouterProtocol?) {
         let moduleAssembly = modulesDI.widgetObjectList()
         let bottomPanelManager = BrowserBottomPanelManager(browser: browser)
@@ -411,7 +427,7 @@ final class EditorAssembly {
         let module = moduleAssembly.makeCollections(bottomPanelManager: bottomPanelManager, output: output)
         return (module, nil)
     }
-
+    
     private func binModule(browser: EditorBrowserController?, output: WidgetObjectListCommonModuleOutput?) -> (UIViewController, EditorPageOpenRouterProtocol?) {
         let moduleAssembly = modulesDI.widgetObjectList()
         let bottomPanelManager = BrowserBottomPanelManager(browser: browser)
@@ -429,3 +445,4 @@ final class EditorAssembly {
         }
     }
 }
+

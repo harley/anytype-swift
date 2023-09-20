@@ -18,8 +18,8 @@ struct UnsupportedBlockViewModel: BlockViewModelProtocol {
     func makeContentConfiguration(maxWidth _ : CGFloat) -> UIContentConfiguration {
         UnsupportedBlockContentConfiguration(text: Loc.unsupportedBlock)
             .cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
+                dragConfiguration: .init(id: info.id),
+                styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
             )
     }
 

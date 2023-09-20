@@ -1,4 +1,3 @@
-import Foundation
 import Services
 import Combine
 import UniformTypeIdentifiers
@@ -18,7 +17,18 @@ final class BlockViewModelBuilder {
     private let audioSessionService: AudioSessionServiceProtocol
     private let infoContainer: InfoContainerProtocol
     private let tableService: BlockTableServiceProtocol
-
+    private let objectTypeProvider: ObjectTypeProviderProtocol
+    private let modelsHolder: EditorMainItemModelsHolder
+    private weak var viewInput: EditorPageViewInput?
+    private let accessoryStateManager: AccessoryViewStateManager
+    private let cursorManager: EditorCursorManager
+    private let keyboardActionHandler: KeyboardActionHandlerProtocol
+    private let editorPageBlocksStateManager: EditorPageBlocksStateManager
+    
+    private let linkToObjectCoordinator: LinkToObjectCoordinatorProtocol
+    private let markupChanger: BlockMarkupChangerProtocol
+    private let slashMenuActionHandler: SlashMenuActionHandler
+    
     init(
         document: BaseDocumentProtocol,
         handler: BlockActionHandlerProtocol,
@@ -32,7 +42,17 @@ final class BlockViewModelBuilder {
         detailsService: DetailsServiceProtocol,
         audioSessionService: AudioSessionServiceProtocol,
         infoContainer: InfoContainerProtocol,
-        tableService: BlockTableServiceProtocol
+        tableService: BlockTableServiceProtocol,
+        objectTypeProvider: ObjectTypeProviderProtocol,
+        modelsHolder: EditorMainItemModelsHolder,
+        viewInput: EditorPageViewInput?,
+        accessoryStateManager: AccessoryViewStateManager,
+        cursorManager: EditorCursorManager,
+        keyboardActionHandler: KeyboardActionHandlerProtocol,
+        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol,
+        markupChanger: BlockMarkupChangerProtocol,
+        slashMenuActionHandler: SlashMenuActionHandler,
+        editorPageBlocksStateManager: EditorPageBlocksStateManager
     ) {
         self.document = document
         self.handler = handler
@@ -47,33 +67,57 @@ final class BlockViewModelBuilder {
         self.audioSessionService = audioSessionService
         self.infoContainer = infoContainer
         self.tableService = tableService
+        self.objectTypeProvider = objectTypeProvider
+        self.modelsHolder = modelsHolder
+        self.viewInput = viewInput
+        self.accessoryStateManager = accessoryStateManager
+        self.cursorManager = cursorManager
+        self.keyboardActionHandler = keyboardActionHandler
+        self.linkToObjectCoordinator = linkToObjectCoordinator
+        self.markupChanger = markupChanger
+        self.slashMenuActionHandler = slashMenuActionHandler
+        self.editorPageBlocksStateManager = editorPageBlocksStateManager
     }
-
-    func buildEditorItems(infos: [BlockInformation]) -> [EditorItem] {
+    
+    func buildEditorItems(infos: [BlockId]) -> [EditorItem] {
         let blockViewModels = build(infos)
+        
+        
         var editorItems = blockViewModels.map (EditorItem.block)
-
+        
         let featureRelationsIndex = blockViewModels.firstIndex { $0.content == .featuredRelations }
-
+        
         if let featureRelationsIndex = featureRelationsIndex {
             let spacer = SpacerBlockViewModel(usage: .firstRowOffset)
             editorItems.insert(.system(spacer), at: featureRelationsIndex + 1)
         }
-
+        
         return editorItems
     }
-
+    
     func buildShimeringItem() -> EditorItem {
         let shimmeringViewModel = ShimmeringBlockViewModel()
-
+        
         return .system(shimmeringViewModel)
     }
-
-    private func build(_ infos: [BlockInformation]) -> [BlockViewModelProtocol] {
-        infos.compactMap(build(info:))
+    
+    private func build(_ ids: [BlockId]) -> [BlockViewModelProtocol] {
+        ids.compactMap {
+            let block = build(id: $0)
+            modelsHolder.blocksMapping[$0] = block
+            return block
+        }
     }
-
-    func build(info: BlockInformation) -> BlockViewModelProtocol? {
+    
+    func build(id: BlockId) -> BlockViewModelProtocol? {
+        if let model = modelsHolder.blocksMapping[id] {
+            return model
+        }
+        
+        guard let info = infoContainer.get(id: id) else {
+            return nil
+        }
+  
         switch info.content {
         case let .text(content):
             switch content.contentType {
@@ -88,7 +132,7 @@ final class BlockViewModelBuilder {
                     codeLanguage: codeLanguage,
                     becomeFirstResponder: { _ in },
                     textDidChange: { [weak self] block, textView in
-                        self?.handler.changeText(textView.attributedText, info: info)
+                        self?.handler.changeText(textView.textStorage, blockId: info.id)
                         self?.delegate.textBlockSetNeedsLayout()
                     },
                     showCodeSelection: { [weak self] info in
@@ -96,16 +140,20 @@ final class BlockViewModelBuilder {
                     }
                 )
             default:
-                let isCheckable = content.contentType == .title ? document.details?.layoutValue == .todo : false
-                let anytypeText = content.anytypeText(document: document)
-                
                 let textBlockActionHandler = TextBlockActionHandler(
                     info: info,
+                    focusSubject: subjectsHolder.focusSubject(for: info.id),
                     showPage: { [weak self] objectId in
                         self?.router.showPage(objectId: objectId)
                     },
                     openURL: { [weak router] url in
                         router?.openUrl(url)
+                    },
+                    onShowStyleMenu: { [weak self] in
+                        self?.editorPageBlocksStateManager.didSelectStyleSelection(infos: [$0])
+                    },
+                    onEnterSelectionMode: { [weak self] in
+                        self?.editorPageBlocksStateManager.didSelectEditingState(info: $0)
                     },
                     showTextIconPicker: { [weak router, weak document] in
                         guard let router, let document else { return }
@@ -120,23 +168,31 @@ final class BlockViewModelBuilder {
                     hideWaitingView: {  [weak router] in
                         router?.hideWaitingView()
                     },
-                    content: content,
-                    anytypeText: anytypeText,
                     showURLBookmarkPopup: { [weak router] parameters in
                         router?.showLinkContextualMenu(inputParameters: parameters)
                     },
                     actionHandler: handler,
                     pasteboardService: pasteboardService,
                     markdownListener: markdownListener,
-                    blockDelegate: delegate
+                    viewInput: viewInput,
+                    cursorManager: cursorManager,
+                    accessoryViewStateManager: accessoryStateManager,
+                    keyboardHandler: keyboardActionHandler,
+                    linkToObjectCoordinator: linkToObjectCoordinator,
+                    markupChanger: markupChanger,
+                    slashMenuActionHandler: slashMenuActionHandler
                 )
-
+                
+                
+                
                 return TextBlockViewModel(
-                    info: info,
-                    content: content,
-                    anytypeText: anytypeText,
-                    isCheckable: isCheckable,
-                    focusSubject: subjectsHolder.focusSubject(for: info.id),
+                    document: document,
+                    blockInformationProvider: BlockModelInfomationProvider(infoContainer: infoContainer, info: info),
+                    stylePublisher: document.detailsPublisher
+                        .receiveOnMain()
+                        .compactMap { $0.layoutValue == .todo ? .todo : .none }
+                        .removeDuplicates()
+                        .eraseToAnyPublisher(),
                     actionHandler: textBlockActionHandler
                 )
             }
@@ -164,8 +220,8 @@ final class BlockViewModelBuilder {
                     },
                     onImageOpen: router.openImage
                 )
-
-
+                
+                
             case .video:
                 return VideoBlockViewModel(
                     info: info,
@@ -214,7 +270,7 @@ final class BlockViewModelBuilder {
                 )
                 return nil
             }
-
+            
             return BlockLinkViewModel(
                 info: info,
                 content: content,
@@ -235,7 +291,6 @@ final class BlockViewModelBuilder {
                 blockDelegate: delegate
             ) { [weak self] relation in
                 guard let self = self else { return }
-
                 let bookmarkFilter = self.document.details?.layoutValue != .bookmark
                 let allowTypeChange = !self.document.objectRestrictions.objectRestriction.contains(.typechange)
                 
@@ -258,7 +313,7 @@ final class BlockViewModelBuilder {
             guard let relation = relation else {
                 return nil
             }
-
+            
             return RelationBlockViewModel(
                 info: info,
                 relation: relation
@@ -310,7 +365,7 @@ final class BlockViewModelBuilder {
             else {
                 return nil
             }
-
+            
             return UnsupportedBlockViewModel(info: info)
         }
     }
@@ -325,15 +380,14 @@ final class BlockViewModelBuilder {
             try await handler.applyTemplate(objectId: document.objectId, templateId: type.defaultTemplateId)
         }
     }
-
     // MARK: - Actions
-
+    
     private var subscriptions = [AnyCancellable]()
-
+    
     private func showMediaPicker(type: MediaPickerContentType, blockId: BlockId) {
         router.showImagePicker(contentType: type) { [weak self] itemProvider in
             guard let itemProvider = itemProvider else { return }
-
+            
             self?.handler.uploadMediaFile(
                 uploadingSource: .itemProvider(itemProvider),
                 type: type,
@@ -341,16 +395,16 @@ final class BlockViewModelBuilder {
             )
         }
     }
-
+    
     private func showFilePicker(blockId: BlockId, types: [UTType] = [.item]) {
         let model = Picker.ViewModel(types: types)
         model.$resultInformation.safelyUnwrapOptionals().sink { [weak self] result in
             self?.handler.uploadFileAt(localPath: result.filePath, blockId: blockId)
         }.store(in: &subscriptions)
-
+        
         router.showFilePicker(model: model)
     }
-
+    
     private func showBookmarkBar(info: BlockInformation) {
         router.showBookmarkBar() { [weak self] url in
             Task { [weak self] in

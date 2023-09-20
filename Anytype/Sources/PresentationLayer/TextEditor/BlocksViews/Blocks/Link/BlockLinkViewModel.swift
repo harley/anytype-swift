@@ -41,14 +41,14 @@ struct BlockLinkViewModel: BlockViewModelProtocol {
 
             return BlockLinkCardConfiguration(state: state, backgroundColor: backgroundColor, todoToggleAction: toggleTodo)
                 .cellBlockConfiguration(
-                    indentationSettings: .init(with: info.configurationData),
-                    dragConfiguration: .init(id: info.id)
+                    dragConfiguration: .init(id: info.id),
+                    styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
                 )
         default:
             return BlockLinkTextConfiguration(state: state, todoToggleAction: toggleTodo)
                 .cellBlockConfiguration(
-                    indentationSettings: .init(with: info.configurationData),
-                    dragConfiguration: .init(id: info.id)
+                    dragConfiguration: .init(id: info.id),
+                    styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
                 )
         }
     }

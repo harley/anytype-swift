@@ -34,8 +34,8 @@ struct TableOfContentsViewModel: BlockViewModelProtocol {
             onTap: onTap,
             blockSetNeedsLayout: blockSetNeedsLayout
         ).cellBlockConfiguration(
-            indentationSettings: IndentationSettings(with: info.configurationData),
-            dragConfiguration: BlockDragConfiguration(id: info.id)
+            dragConfiguration: BlockDragConfiguration(id: info.id),
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
         )
     }
     

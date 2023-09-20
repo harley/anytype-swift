@@ -6,32 +6,21 @@ struct AccessoryViewBuilder {
     static func accessoryState(
         actionHandler: BlockActionHandlerProtocol,
         router: EditorRouterProtocol,
-        pasteboardService: PasteboardServiceProtocol,
         document: BaseDocumentProtocol,
-        onShowStyleMenu: @escaping RoutingAction<[BlockInformation]>,
-        onBlockSelection: @escaping RoutingAction<BlockInformation>,
-        pageService: PageRepositoryProtocol,
-        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol,
-        cursorManager: EditorCursorManager
+        searchService: SearchServiceProtocol
     ) -> AccessoryViewStateManager {
-        let mentionsView = MentionView(
-            document: document,
-            frame: CGRect(origin: .zero, size: menuActionsViewSize)
-        )
+        let mentionsModule = MentionAssembly().controller(document: document)
         
-        let cursorModeAccessoryViewModel = CursorModeAccessoryViewModel(
-            handler: actionHandler,
-            onShowStyleMenu: onShowStyleMenu,
-            onBlockSelection: onBlockSelection
-        )
+        let mentionsView = MentionView(mentionsController: mentionsModule.0, frame: CGRect(origin: .zero, size: menuActionsViewSize))
         
-        let markupViewModel = MarkupAccessoryViewModel(
-            document: document,
-            actionHandler: actionHandler,
-            pageService: pageService,
-            linkToObjectCoordinator: linkToObjectCoordinator
-        )
-
+        mentionsModule.0.dismissAction = { [weak mentionsView] in
+            mentionsView?.dismissHandler?()
+        }
+        
+        let cursorModeAccessoryViewModel = CursorModeAccessoryViewModel()
+        
+        let markupViewModel = MarkupAccessoryViewModel()
+        
         let changeTypeViewModel = ChangeTypeAccessoryViewModel(
             router: router,
             handler: actionHandler,
@@ -40,55 +29,61 @@ struct AccessoryViewBuilder {
         )
         
         let typeListViewModel = HorizonalTypeListViewModel(itemProvider: changeTypeViewModel)
-
+        
         let horizontalTypeListView = HorizonalTypeListView(viewModel: typeListViewModel)
-
+        
         let changeTypeView = ChangeTypeAccessoryView(
             viewModel: changeTypeViewModel,
             changeTypeView: horizontalTypeListView.asUIView()
         )
-
+        
         let cursorModeAccessoryView = CursorModeAccessoryView(viewModel: cursorModeAccessoryViewModel)
         let markupModeAccessoryView = MarkupAccessoryView(viewModel: markupViewModel)
-
+        
         let slashMenuViewModel = SlashMenuViewModel(
-            handler: SlashMenuActionHandler(
-                document: document,
-                actionHandler: actionHandler,
-                router: router,
-                pasteboardService: pasteboardService,
-                cursorManager: cursorManager
-            )
+            detailsMenuBuilder: SlashMenuCellDataBuilder(),
+            itemsBuilder: SlashMenuItemsBuilder(searchService: searchService)
         )
         let slashMenuView = SlashMenuAssembly.menuView(
             size: menuActionsViewSize,
             viewModel: slashMenuViewModel
         )
-
+        
         let accessoryViewSwitcher = AccessoryViewSwitcher(
             mentionsView: mentionsView,
             slashMenuView: slashMenuView,
             cursorModeAccessoryView: cursorModeAccessoryView,
             markupAccessoryView: markupModeAccessoryView,
-            changeTypeView: changeTypeView,
-            document: document
+            changeTypeView: changeTypeView
         )
-
+        
         slashMenuViewModel.resetSlashMenuHandler = { [weak accessoryViewSwitcher] in
             accessoryViewSwitcher?.restoreDefaultState()
-
+            
         }
-
+        
         // set delegate
-        let stateManager = AccessoryViewStateManagerImpl(switcher: accessoryViewSwitcher, handler: actionHandler)
-        mentionsView.delegate = stateManager
-        cursorModeAccessoryView.setDelegate(stateManager)
-
+        let stateManager = AccessoryViewStateManagerImpl(
+            document: document,
+            switcher: accessoryViewSwitcher,
+            markupChanger: BlockMarkupChanger(),
+            cursorModeViewModel: cursorModeAccessoryViewModel,
+            slashMenuViewModel: slashMenuViewModel,
+            mentionsViewModel: mentionsModule.1,
+            markupAccessoryViewModel: markupViewModel
+        )
+        
+        mentionsModule.1.onSelect = { [weak stateManager] in
+            stateManager?.selectMention($0)
+        }
+        
         return stateManager
     }
-    
+
     private static let menuActionsViewSize = CGSize(
         width: UIScreen.main.bounds.width,
         height: UIScreen.main.isFourInch ? 160 : 215
     )
 }
+
+

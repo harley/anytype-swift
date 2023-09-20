@@ -1,6 +1,14 @@
+import AnytypeCore
+
 public extension BlockInformation {
     func flatChildrenTree(container: InfoContainerProtocol) -> [BlockInformation] {
         ChildrenInfoTreeBuilder(container: container, root: self).flatList()
+    }
+    
+    func childrenTreeList(container: InfoContainerProtocol) -> [TreeList<BlockInformation>] {
+        return []
+//        ChildrenInfoTreeBuilder(container: container, root: self)
+//            .treeList(blockInfo: self)
     }
     
     var isToggled: Bool {
@@ -18,6 +26,16 @@ public extension BlockInformation {
         case .text, .file, .divider, .bookmark, .link, .featuredRelations, .relation, .dataView, .table,
                 .tableOfContents, .widget, .unsupported:
             return .block
+        }
+    }
+    
+    var textContent: BlockText? {
+        switch content {
+        case .text(let blockText):
+            return blockText
+        default:
+            anytypeAssertionFailure("Couldn't retrieve blockText content from BlockInformation")
+            return nil
         }
     }
     

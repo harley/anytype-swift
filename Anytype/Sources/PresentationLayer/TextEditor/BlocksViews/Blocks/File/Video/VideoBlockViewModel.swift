@@ -42,8 +42,8 @@ struct VideoBlockViewModel: BlockViewModelProtocol {
                     }
                 }
             ).cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
+                dragConfiguration: .init(id: info.id),
+                styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
             )
         }
     }
@@ -54,8 +54,8 @@ struct VideoBlockViewModel: BlockViewModelProtocol {
             text: text,
             state: state
         ).cellBlockConfiguration(
-                indentationSettings: .init(with: info.configurationData),
-                dragConfiguration: .init(id: info.id)
-            )
+            dragConfiguration: .init(id: info.id),
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
+        )
     }
 }

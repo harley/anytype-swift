@@ -4,18 +4,20 @@ import Combine
 import AnytypeCore
 import SwiftUI
 
+enum EditorPageConfigurationConstants {
+    static let dataSourceAnimationEnabled = false
+}
+
 final class EditorPageController: UIViewController {
     
     let bottomNavigationManager: EditorBottomNavigationManagerProtocol
     private(set) weak var browserViewInput: EditorBrowserViewInputProtocol?
     private(set) lazy var dataSource = makeCollectionViewDataSource()
     private weak var firstResponderView: UIView?
+    private lazy var debouncer = Debouncer()
+    private let layout = EditorCollectionFlowLayout()
 
-    let collectionView: EditorCollectionView = {
-        var listConfiguration = UICollectionLayoutListConfiguration(appearance: .plain)
-        listConfiguration.backgroundColor = .clear
-        listConfiguration.showsSeparators = false
-        let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
+    lazy var collectionView: EditorCollectionView = {
         let collectionView = EditorCollectionView(
             frame: .zero,
             collectionViewLayout: layout
@@ -70,6 +72,7 @@ final class EditorPageController: UIViewController {
     var viewModel: EditorPageViewModelProtocol! {
         didSet {
             viewModel.setupSubscriptions()
+            layout.document = viewModel.document
         }
     }
 
@@ -157,9 +160,9 @@ final class EditorPageController: UIViewController {
             let isAscendingTouch = pointInCell.y > cell.center.y
             let threshold: CGFloat = isAscendingTouch ? Constants.selectingTextThreshold : -Constants.selectingTextThreshold
             var locationInCollectionView = touch.location(in: collectionView)
-
+            
             locationInCollectionView.y = locationInCollectionView.y + threshold
-
+            
             guard let touchingIndexPath = collectionView.indexPathForItem(at: locationInCollectionView),
                   let touchingItem = dataSource.itemIdentifier(for: touchingIndexPath),
                   touchingItem != selectingRangeEditorItem,
@@ -168,13 +171,13 @@ final class EditorPageController: UIViewController {
             else {
                 return
             }
-
+            
             let isValidForDescending = selectingRangeTextView.textViewSelectionPosition.contains(.start) &&
-                            sourceTextIndexPath.compare(touchingIndexPath) == .orderedDescending
-
+            sourceTextIndexPath.compare(touchingIndexPath) == .orderedDescending
+            
             let isValidForAscending = selectingRangeTextView.textViewSelectionPosition.contains(.end) &&
-                            sourceTextIndexPath.compare(touchingIndexPath) == .orderedAscending
-
+            sourceTextIndexPath.compare(touchingIndexPath) == .orderedAscending
+            
             if isValidForAscending || isValidForDescending {
                 UIApplication.shared.hideKeyboard()
                 viewModel.blocksStateManager.didSelectSelection(from: sourceTextIndexPath)
@@ -306,16 +309,16 @@ extension EditorPageController: EditorPageViewInput {
     var contentOffsetDidChangedStatePublisher: AnyPublisher<CGPoint, Never> {
         $offsetDidChanged.eraseToAnyPublisher()
     }
-
+    
     func visibleRect(to view: UIView) -> CGRect {
         return collectionView.convert(collectionView.bounds, to: view)
     }
-
+    
     func update(header: ObjectHeader) {
         var headerSnapshot = NSDiffableDataSourceSectionSnapshot<EditorItem>()
         headerSnapshot.append([.header(header)])
-        dataSource.apply(headerSnapshot, to: .header, animatingDifferences: true)
-
+        dataSource.apply(headerSnapshot, to: .header, animatingDifferences: EditorPageConfigurationConstants.dataSourceAnimationEnabled)
+        
         navigationBarHelper.configureNavigationBar(using: header)
     }
     
@@ -326,29 +329,34 @@ extension EditorPageController: EditorPageViewInput {
     func update(syncStatus: SyncStatus) {
         navigationBarHelper.updateSyncStatus(syncStatus)
     }
-
+    
     func update(changes: CollectionDifference<EditorItem>?) {
         let currentSnapshot = dataSource.snapshot(for: .main)
-
+        
         if let changes = changes {
             for change in changes.insertions {
                 guard currentSnapshot.isVisible(change.element) else { continue }
-
+                
                 reloadCell(for: change.element)
             }
         }
     }
-
+    
     func didSelectTextRangeSelection(blockId: BlockId, textView: UITextView) {
         if let item = dataSourceItem(for: blockId), textView.textViewSelectionPosition.contains(.end) || textView.textViewSelectionPosition.contains(.start) {
             self.selectingRangeEditorItem = item
             self.selectingRangeTextView = textView
         }
     }
+    
+    func reloadItems(items: [EditorItem]) {
+        items.forEach { reloadCell(for: $0) }
+    }
 
     func update(
         changes: CollectionDifference<EditorItem>?,
-        allModels: [EditorItem]
+        allModels: [EditorItem],
+        completion: @escaping () -> Void
     ) {
         var blocksSnapshot = NSDiffableDataSourceSectionSnapshot<EditorItem>()
         blocksSnapshot.append(allModels)
@@ -362,7 +370,7 @@ extension EditorPageController: EditorPageViewInput {
         }
 
         let animatingDifferences = changes?.canPerformAnimation ?? true
-        applyBlocksSectionSnapshot(blocksSnapshot, animatingDifferences: animatingDifferences)
+        applyBlocksSectionSnapshot(blocksSnapshot, animatingDifferences: animatingDifferences, completion: completion)
     }
 
     func scrollToBlock(blockId: BlockId) {
@@ -393,30 +401,38 @@ extension EditorPageController: EditorPageViewInput {
     }
 
     func blockDidChangeFrame() {
+//        debouncer.debounce(milliseconds: 100) { [weak self] in
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let currentSnapshot = self.dataSource.snapshot()
-            self.dataSource.apply(currentSnapshot, animatingDifferences: true)
+            
+            printTimeElapsedWhenRunningCode(title: "dataSource.apply") { [weak self] in
+                
+                guard let self = self else { return }
+                
+                let currentSnapshot = self.dataSource.snapshot()
+                self.dataSource.apply(currentSnapshot, animatingDifferences: false)
+            }
         }
+//            }
+//        }
     }
 
     func textBlockDidChangeText() {
         // For future changes
     }
 
-    func blockDidFinishEditing(blockId: BlockId) {
+    func blockDidFinishEditing() {
         self.selectingRangeTextView = nil
         self.selectingRangeEditorItem = nil
 
-        viewModel.didFinishEditing(blockId: blockId)
-        
-        guard let newItem = viewModel.modelsHolder.contentProvider(for: blockId) else { return }
-
-        reloadCell(for: .block(newItem))
-
-        var blocksSnapshot = NSDiffableDataSourceSectionSnapshot<EditorItem>()
-        blocksSnapshot.append(viewModel.modelsHolder.items)
-        applyBlocksSectionSnapshot(blocksSnapshot, animatingDifferences: false)
+//        viewModel.didFinishEditing(blockId: blockId)
+//
+//        guard let newItem = viewModel.modelsHolder.contentProvider(for: blockId) else { return }
+//
+//        reloadCell(for: .block(newItem))
+//
+//        var blocksSnapshot = NSDiffableDataSourceSectionSnapshot<EditorItem>()
+//        blocksSnapshot.append(viewModel.modelsHolder.items)
+//        applyBlocksSectionSnapshot(blocksSnapshot, animatingDifferences: false)
     }
 
     // MARK: -
@@ -632,19 +648,18 @@ private extension EditorPageController {
 private extension EditorPageController {
     func applyBlocksSectionSnapshot(
         _ snapshot: NSDiffableDataSourceSectionSnapshot<EditorItem>,
-        animatingDifferences: Bool
+        animatingDifferences: Bool,
+        completion: @escaping () -> Void
     ) {
-        if #available(iOS 15.0, *) {
-            dataSource.apply(snapshot, to: .main, animatingDifferences: animatingDifferences)
-        } else {
-            UIView.performWithoutAnimation {
-                dataSource.apply(snapshot, to: .main, animatingDifferences: true)
-            }
-        }
+        dataSource.apply(
+            snapshot,
+            to: .main,
+            animatingDifferences: EditorPageConfigurationConstants.dataSourceAnimationEnabled, completion: completion
+        )
 
         let selectedCells = collectionView.indexPathsForSelectedItems
         selectedCells?.forEach {
-            self.collectionView.selectItem(at: $0, animated: false, scrollPosition: [])
+            collectionView.selectItem(at: $0, animated: false, scrollPosition: [])
         }
     }
 }

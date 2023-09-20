@@ -2,16 +2,11 @@ import Services
 import UIKit
 import AnytypeCore
 
-final class SimpleTableHeightCacheContainer {
-    var cachedSectionRowHeights = [AnyHashable: CGFloat]()
-}
-
 struct SimpleTableDependenciesContainer {
     let blockDelegate: BlockDelegate?
     let relativePositionProvider: RelativePositionProvider?
     let stateManager: SimpleTableStateManager
     let viewModel: SimpleTableViewModel
-    let cacheContainer: SimpleTableHeightCacheContainer
 }
 
 final class SimpleTableDependenciesBuilder {
@@ -25,9 +20,9 @@ final class SimpleTableDependenciesBuilder {
     private let focusSubjectHolder: FocusSubjectsHolder
     private let tableService = BlockTableService()
     private let responderScrollViewHelper: ResponderScrollViewHelper
-    private let cacheContainer = SimpleTableHeightCacheContainer()
     private let pageService: PageRepositoryProtocol
     private let linkToObjectCoordinator: LinkToObjectCoordinatorProtocol
+    private let searchService: SearchServiceProtocol
 
     weak var mainEditorSelectionManager: SimpleTableSelectionHandler?
     weak var viewInput: (EditorPageViewInput & RelativePositionProvider)?
@@ -43,7 +38,8 @@ final class SimpleTableDependenciesBuilder {
         mainEditorSelectionManager: SimpleTableSelectionHandler?,
         responderScrollViewHelper: ResponderScrollViewHelper,
         pageService: PageRepositoryProtocol,
-        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol
+        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol,
+        searchService: SearchServiceProtocol
     ) {
         self.document = document
         self.router = router
@@ -56,6 +52,7 @@ final class SimpleTableDependenciesBuilder {
         self.responderScrollViewHelper = responderScrollViewHelper
         self.pageService = pageService
         self.linkToObjectCoordinator = linkToObjectCoordinator
+        self.searchService = searchService
         
         self.cursorManager = EditorCursorManager(focusSubjectHolder: focusSubjectHolder)
     }
@@ -81,13 +78,8 @@ final class SimpleTableDependenciesBuilder {
         let simpleTablesAccessoryState = AccessoryViewBuilder.accessoryState(
             actionHandler: handler,
             router: router,
-            pasteboardService: pasteboardService,
             document: document,
-            onShowStyleMenu: stateManager.didSelectStyleSelection(infos:),
-            onBlockSelection: stateManager.didSelectEditingState(info:),
-            pageService: pageService,
-            linkToObjectCoordinator: linkToObjectCoordinator,
-            cursorManager: cursorManager
+            searchService: searchService
         )
 
         let simpleTablesBlockDelegate = BlockDelegateImpl(
@@ -120,8 +112,7 @@ final class SimpleTableDependenciesBuilder {
             blockDelegate: simpleTablesBlockDelegate,
             relativePositionProvider: viewInput,
             stateManager: stateManager,
-            viewModel: viewModel,
-            cacheContainer: cacheContainer
+            viewModel: viewModel
         )
     }
 }

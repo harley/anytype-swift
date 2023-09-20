@@ -3,14 +3,14 @@ import AnytypeCore
 import UIKit
 
 protocol BlockDelegate: AnyObject {
-    func willBeginEditing(data: TextBlockDelegateData)
+    func willBeginEditing(with configuration: TextViewAccessoryConfiguration)
     func didBeginEditing(view: UIView)
-    func didEndEditing(data: TextBlockDelegateData)
+    func didEndEditing(with configuration: TextViewAccessoryConfiguration)
 
     func textWillChange(changeType: TextChangeType)
-    func textDidChange(data: TextBlockDelegateData)
+    func textDidChange(data: TextViewAccessoryConfiguration)
     func textBlockSetNeedsLayout()
-    func selectionDidChange(data: TextBlockDelegateData, range: NSRange)
+    func selectionDidChange(data: TextViewAccessoryConfiguration, range: NSRange)
     func scrollToBlock(blockId: BlockId)
 }
 
@@ -36,21 +36,21 @@ final class BlockDelegateImpl: BlockDelegate {
         viewInput?.textBlockDidBeginEditing(firstResponderView: view)
     }
 
-    func willBeginEditing(data: TextBlockDelegateData) {
-        viewInput?.textBlockWillBeginEditing()
-        accessoryState.willBeginEditing(data: data)
+    func willBeginEditing(with configuration: TextViewAccessoryConfiguration) {
+//        viewInput?.textBlockWillBeginEditing()
+//        accessoryState.willBeginEditing(with configuration: data)
     }
     
-    func didEndEditing(data: TextBlockDelegateData) {
-        viewInput?.blockDidFinishEditing(blockId: data.info.id)
-        accessoryState.didEndEditing(data: data)
+    func didEndEditing(with configuration: TextViewAccessoryConfiguration) {
+//        viewInput?.blockDidFinishEditing(blockId: data.info.id)
+//        accessoryState.didEndEditing(with configuration: data)
     }
     
     func textWillChange(changeType: TextChangeType) {
         self.changeType = changeType
     }
     
-    func textDidChange(data: TextBlockDelegateData) {
+    func textDidChange(data: TextViewAccessoryConfiguration) {
         viewInput?.textBlockDidChangeText()
 
         guard let changeType = changeType else { return }
@@ -62,10 +62,10 @@ final class BlockDelegateImpl: BlockDelegate {
         viewInput?.blockDidChangeFrame()
     }
 
-    func selectionDidChange(data: TextBlockDelegateData, range: NSRange) {
-        accessoryState.selectionDidChange(range: range)
-        cursorManager.didChangeCursorPosition(at: data.info.id, position: .at(range))
-        viewInput?.didSelectTextRangeSelection(blockId: data.info.id, textView: data.textView)
+    func selectionDidChange(data: TextViewAccessoryConfiguration, range: NSRange) {
+//        accessoryState.selectionDidChange(range: range)
+//        cursorManager.didChangeCursorPosition(at: data.info.id, position: .at(range))
+//        viewInput?.didSelectTextRangeSelection(blockId: data.info.id, textView: data.textView)
     }
     
     func scrollToBlock(blockId: BlockId) {

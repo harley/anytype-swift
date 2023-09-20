@@ -1,6 +1,22 @@
 import UIKit
 
 class EditorCollectionView: UICollectionView {
+    override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
+        super.init(frame: frame, collectionViewLayout: layout)
+        
+        setup()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        
+        setup()
+    }
+    
+    private func setup() {
+        alwaysBounceVertical = true
+    }
+    
     override var adjustedContentInset: UIEdgeInsets {
         .init(
             top: 0,

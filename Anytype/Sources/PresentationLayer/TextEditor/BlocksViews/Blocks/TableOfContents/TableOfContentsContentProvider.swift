@@ -26,9 +26,11 @@ final class TableOfContentsContentProvider {
     
     private func startUpdateContent() {
         updateContent()
-        document.updatePublisher.sink { [weak self] in
-            self?.handleUpdate(updateResult: $0)
-        }.store(in: &subscriptions)
+        
+        #warning("Make TOC great again")
+//        document.updatePublisher.sink { [weak self] in
+//            self?.handleUpdate(updateResult: $0)
+//        }.store(in: &subscriptions)
     }
     
     private func handleUpdate(updateResult: DocumentUpdate) {
@@ -41,9 +43,9 @@ final class TableOfContentsContentProvider {
                 updateContent()
                 break
             }
-        case .dataSourceUpdate, .general:
+        case .general, .children:
             updateContent()
-        case .syncStatus, .details:
+        case .syncStatus, .details, .unhandled:
             break
         }
     }

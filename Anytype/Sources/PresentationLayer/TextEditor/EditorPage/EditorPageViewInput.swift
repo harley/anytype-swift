@@ -6,10 +6,11 @@ protocol EditorPageViewInput: RelativePositionProvider {
     
     func update(header: ObjectHeader)
     func update(details: ObjectDetails?, templatesCount: Int)
-    func update(changes: CollectionDifference<EditorItem>?)
+    func reloadItems(items: [EditorItem])
     func update(
         changes: CollectionDifference<EditorItem>?,
-        allModels: [EditorItem]
+        allModels: [EditorItem],
+        completion: @escaping () -> Void
     )
     func update(syncStatus: SyncStatus)
         
@@ -23,7 +24,7 @@ protocol EditorPageViewInput: RelativePositionProvider {
     /// Tells the delegate when editing of the text block will begin
     func textBlockWillBeginEditing()
 
-    func blockDidFinishEditing(blockId: BlockId)
+    func blockDidFinishEditing()
     
     func scrollToBlock(blockId: BlockId)
 

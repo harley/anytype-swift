@@ -44,8 +44,8 @@ struct FeaturedRelationsBlockViewModel: BlockViewModelProtocol {
             },
             heightDidChanged: { blockDelegate?.textBlockSetNeedsLayout() }
         ).cellBlockConfiguration(
-            indentationSettings: .init(with: info.configurationData),
-            dragConfiguration: nil
+            dragConfiguration: nil,
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
         )
     }
     

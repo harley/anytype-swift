@@ -59,8 +59,8 @@ struct DataViewBlockViewModel: BlockViewModelProtocol {
             content: content
         )
         .cellBlockConfiguration(
-            indentationSettings: .init(with: info.configurationData),
-            dragConfiguration: .init(id: info.id)
+            dragConfiguration: .init(id: info.id),
+            styleConfiguration: .init(backgroundColor: info.backgroundColor?.backgroundColor.color)
         )
     }
 
