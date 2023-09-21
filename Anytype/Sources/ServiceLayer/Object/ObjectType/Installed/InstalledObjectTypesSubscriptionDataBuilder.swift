@@ -35,6 +35,7 @@ final class InstalledObjectTypesSubscriptionDataBuilder: InstalledObjectTypesSub
             BundledRelationKey.name.rawValue,
             BundledRelationKey.iconEmoji.rawValue,
             BundledRelationKey.description.rawValue,
+            BundledRelationKey.recommendedLayout.rawValue,
             BundledRelationKey.defaultTemplateId.rawValue
         ]
 

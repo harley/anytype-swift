@@ -5,7 +5,7 @@ protocol TemplateModulesAssemblyProtocol {
     @MainActor
     func buildTemplateSelection(
         setDocument: SetDocumentProtocol,
-        dataView: DataviewView,
+        viewId: String,
         onTemplateSelection: @escaping (BlockId?) -> Void,
         onObjectTypesSearchAction: @escaping () -> Void
     ) -> TemplatesSelectionView
@@ -23,7 +23,7 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
     @MainActor
     func buildTemplateSelection(
         setDocument: SetDocumentProtocol,
-        dataView: DataviewView,
+        viewId: String,
         onTemplateSelection: @escaping (BlockId?) -> Void,
         onObjectTypesSearchAction: @escaping () -> Void
     ) -> TemplatesSelectionView {
@@ -31,8 +31,8 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
             model: .init(
                 interactor: DataviewTemplateSelectionInteractorProvider(
                     setDocument: setDocument,
-                    dataView: dataView,
-                    objectTypeProvider: self.serviceLocator.objectTypeProvider(),
+                    viewId: viewId,
+                    installedObjectTypesProvider: self.serviceLocator.installedObjectTypesProvider(),
                     subscriptionService: TemplatesSubscriptionService(subscriptionService: self.serviceLocator.subscriptionService()),
                     dataviewService: DataviewService(
                         objectId: setDocument.objectId,
@@ -41,7 +41,6 @@ final class TemplateModulesAssembly: TemplateModulesAssemblyProtocol {
                     )
                 ),
                 setDocument: setDocument,
-                installedObjectTypesProvider: self.serviceLocator.installedObjectTypesProvider(),
                 templatesService: self.serviceLocator.templatesService,
                 toastPresenter: self.uiHelperDI.toastPresenter(),
                 onTemplateSelection: onTemplateSelection,

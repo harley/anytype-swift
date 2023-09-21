@@ -7,7 +7,7 @@ protocol TemplateSelectionCoordinatorProtocol: AnyObject {
     @MainActor
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
-        dataview: DataviewView,
+        viewId: String,
         floatingPanelStyle: Bool,
         onTemplateSelection: @escaping (BlockId?) -> ()
     )
@@ -44,13 +44,13 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
     @MainActor
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
-        dataview: DataviewView,
+        viewId: String,
         floatingPanelStyle: Bool,
         onTemplateSelection: @escaping (BlockId?) -> ()
     ) {
         let view = templatesModuleAssembly.buildTemplateSelection(
             setDocument: setDocument,
-            dataView: dataview,
+            viewId: viewId,
             onTemplateSelection: { [weak navigationContext] templateId in
                 navigationContext?.dismissTopPresented(animated: true) {
                     onTemplateSelection(templateId)

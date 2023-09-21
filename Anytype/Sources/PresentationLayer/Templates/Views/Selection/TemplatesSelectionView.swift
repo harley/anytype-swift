@@ -55,8 +55,8 @@ struct TemplatesSelectionView: View {
     private var objectTypesCollection: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
-                ForEach(model.objectTypes) { config in
-                    objectTypeView(config: config)
+                ForEach(model.objectTypes) { model in
+                    objectTypeView(model: model)
                 }
             }
             .frame(height: 48)
@@ -66,24 +66,24 @@ struct TemplatesSelectionView: View {
     }
     
     // надо разделить эти вьюшки все-таки
-    private func objectTypeView(config: ObjectTypeConfiguration) -> some View {
+    private func objectTypeView(model: InstalledObjectTypeViewModel) -> some View {
         Button {
-            config.onTap()
+            model.onTap()
         } label: {
             HStack(spacing: 0) {
-                IconView(icon: config.icon)
+                IconView(icon: model.icon)
                     .frame(width: 18, height: 18)
-                if let title = config.title {
+                if let title = model.title {
                     Spacer.fixedWidth(8)
                     AnytypeText(title, style: .uxCalloutMedium, color: .Text.primary)
                 }
             }
             .frame(height: 48)
-            .padding(.leading, config.title.isNil ? 15 : 14)
-            .padding(.trailing, config.title.isNil ? 15 : 16)
+            .padding(.leading, model.title.isNil ? 15 : 14)
+            .padding(.trailing, model.title.isNil ? 15 : 16)
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.Stroke.primary, lineWidth: 1)
+                    .stroke(model.isSelected ? Color.System.amber50 : Color.Stroke.primary, lineWidth: 1)
             )
         }
     }
@@ -93,7 +93,16 @@ struct TemplatesSelectionView: View {
             SectionHeaderView(title: Loc.TemplateSelection.Template.subtitle)
                 .padding(.horizontal, 16)
             Spacer.fixedHeight(4)
-            templatesCollection
+            if model.isTemplatesAvailable {
+                templatesCollection
+            } else {
+                VStack(spacing: 0) {
+                    Spacer()
+                    AnytypeText(Loc.TemplateSelection.ObjectType.NoTemplates.title, style: .uxCalloutRegular, color: .Text.secondary)
+                    Spacer()
+                }
+                .frame(height: 232)
+            }
         }
     }
     
@@ -121,7 +130,6 @@ struct TemplatesSelectionView_Previews: PreviewProvider {
             model: .init(
                 interactor: MockTemplateSelectionInteractorProvider(),
                 setDocument: MockSetDocument(),
-                installedObjectTypesProvider: DI.preview.serviceLocator.installedObjectTypesProvider(),
                 templatesService: TemplatesService(),
                 toastPresenter: ToastPresenter(
                     viewControllerProvider: ViewControllerProvider(sceneWindow: UIWindow()),

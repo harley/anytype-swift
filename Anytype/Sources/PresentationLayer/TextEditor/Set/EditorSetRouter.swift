@@ -56,7 +56,7 @@ protocol EditorSetRouterProtocol:
     @MainActor
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
-        dataview: DataviewView,
+        viewId: String,
         onTemplateSelection: @escaping (BlockId?) -> ()
     )
 }
@@ -417,12 +417,12 @@ final class EditorSetRouter: EditorSetRouterProtocol, ObjectSettingsCoordinatorO
     @MainActor
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
-        dataview: DataviewView,
+        viewId: String,
         onTemplateSelection: @escaping (BlockId?) -> ()
     ) {
         templateSelectionCoordinator.showTemplatesSelection(
             setDocument: setDocument,
-            dataview: dataview,
+            viewId: viewId,
             floatingPanelStyle: true,
             onTemplateSelection: onTemplateSelection
         )

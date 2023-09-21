@@ -75,11 +75,10 @@ final class SetViewSettingsCoordinatorViewModel: ObservableObject, SetViewSettin
     }
     
     func startTemplatesSelectionFlow() {
-        // should impl different scenarious
-        let dataView = setDocument.view(by: viewId)
+        // should impl different scenarious with object type or not
         templateSelectionCoordinator.showTemplatesSelection(
             setDocument: setDocument,
-            dataview: dataView,
+            viewId: viewId,
             floatingPanelStyle: false,
             onTemplateSelection: { _ in }
         )
