@@ -120,14 +120,8 @@ final class HomeWidgetsCoordinator: HomeWidgetsCoordinatorProtocol, HomeWidgetsM
         guard let shareView = shareView else {
             return
         }
-        
-        let shareViewPopup = AnytypePopup(
-            contentView: shareView,
-            floatingPanelStyle: true,
-            configuration: .init(isGrabberVisible: false, dismissOnBackdropView: true)
-        )
 
-        navigationContext.present(shareView)
+        navigationContext.present(shareView, animated: false)
     }
     
     // MARK: - HomeWidgetsModuleOutput
