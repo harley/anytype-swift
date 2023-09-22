@@ -109,6 +109,7 @@ final class EditorAssembly {
             toastPresenter: uiHelpersDI.toastPresenter(using: browser),
             alertHelper: AlertHelper(viewController: controller),
             templateSelectionCoordinator: TemplateSelectionCoordinator(
+                mode: .create,
                 navigationContext: navigationContext,
                 templatesModulesAssembly: modulesDI.templatesAssembly(),
                 editorAssembly: coordinatorsDI.editor(),
@@ -152,6 +153,7 @@ final class EditorAssembly {
             addNewRelationCoordinator: coordinatorsDI.addNewRelation().make(),
             templatesCoordinator: coordinatorsDI.templates().make(viewController: controller),
             templateSelectionCoordinator: TemplateSelectionCoordinator(
+                mode: .create,
                 navigationContext: navigationContext,
                 templatesModulesAssembly: modulesDI.templatesAssembly(),
                 editorAssembly: coordinatorsDI.editor(),

@@ -33,6 +33,7 @@ final class SetViewSettingsCoordinatorAssembly: SetViewSettingsCoordinatorAssemb
         navigationContext: NavigationContextProtocol
     ) -> AnyView {
         let templateSelectionCoordinator = TemplateSelectionCoordinator(
+            mode: .default,
             navigationContext: navigationContext,
             templatesModulesAssembly: modulesDI.templatesAssembly(),
             editorAssembly: coordinatorsDI.editor(),

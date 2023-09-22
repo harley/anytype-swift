@@ -128,15 +128,14 @@ struct TemplatesSelectionView_Previews: PreviewProvider {
     static var previews: some View {
         TemplatesSelectionView(
             model: .init(
+                mode: .create,
                 interactor: MockTemplateSelectionInteractorProvider(),
                 setDocument: MockSetDocument(),
                 templatesService: TemplatesService(),
                 toastPresenter: ToastPresenter(
                     viewControllerProvider: ViewControllerProvider(sceneWindow: UIWindow()),
                     keyboardHeightListener: KeyboardHeightListener()
-                ),
-                onTemplateSelection: { _ in },
-                onObjectTypesSearchAction: { }
+                )
             )
         )
         .previewLayout(.sizeThatFits)

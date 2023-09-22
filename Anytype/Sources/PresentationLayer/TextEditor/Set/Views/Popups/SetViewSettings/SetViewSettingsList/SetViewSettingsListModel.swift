@@ -20,8 +20,7 @@ final class SetViewSettingsListModel: ObservableObject {
     private let setDocument: SetDocumentProtocol
     private let viewId: String
     private let dataviewService: DataviewServiceProtocol
-    private let templatesInteractor: SetTemplatesInteractorProtocol
-    private let templateInteractorProvider: TemplateSelectionInteractorProvider?
+    private let templateInteractorProvider: TemplateSelectionInteractorProvider
     private weak var output: SetViewSettingsCoordinatorOutput?
     
     private var cancellables = [AnyCancellable]()
@@ -33,15 +32,13 @@ final class SetViewSettingsListModel: ObservableObject {
         viewId: String,
         mode: SetViewSettingsMode,
         dataviewService: DataviewServiceProtocol,
-        templatesInteractor: SetTemplatesInteractorProtocol,
-        templateInteractorProvider: TemplateSelectionInteractorProvider?,
+        templateInteractorProvider: TemplateSelectionInteractorProvider,
         output: SetViewSettingsCoordinatorOutput?
     ) {
         self.setDocument = setDocument
         self.viewId = viewId
         self.mode = mode
         self.dataviewService = dataviewService
-        self.templatesInteractor = templatesInteractor
         self.templateInteractorProvider = templateInteractorProvider
         self.output = output
         self.canBeDeleted = setDocument.dataView.views.count > 1
@@ -113,7 +110,7 @@ final class SetViewSettingsListModel: ObservableObject {
         setDocument.detailsPublisher.sink { [weak self] details in
             guard let self else { return }
             if setDocument.isTypeSet() {
-                checkTemplatesAvailablility(details: details)
+//                checkTemplatesAvailablility(details: details)
             } else {
                 settings = SetViewSettings.allCases.filter { $0 != .defaultTemplate }
             }
@@ -126,7 +123,6 @@ final class SetViewSettingsListModel: ObservableObject {
         name = view.name
         layoutValue = view.type.name
         updateRelationsValue()
-        updateDefaultObjectValue(with: view)
         
         let sorts = setDocument.sorts(for: viewId)
         updateSortsValue(sorts)
@@ -136,7 +132,7 @@ final class SetViewSettingsListModel: ObservableObject {
     }
     
     private func setupTemplatesSubscriptions() {
-        templateInteractorProvider?.userTemplates.sink { [weak self] templates in
+        templateInteractorProvider.userTemplates.sink { [weak self] templates in
             let defaultTemplate = templates.first(where: { $0.isDefault })
             
             let title: String
@@ -157,6 +153,14 @@ final class SetViewSettingsListModel: ObservableObject {
             self?.updateDefaultTemplateValue(with: title)
         }.store(in: &cancellables)
         
+        templateInteractorProvider.objectTypesConfigPublisher.sink { [weak self] config in
+            let objectType = config.objectTypes.first { $0.id == config.defaultObjectTypeId.rawValue }
+            guard let objectType else { return }
+            self?.defaultObjectValue = objectType.name
+            self?.settings = objectType.recommendedLayout.isTemplatesAvailable ?
+            SetViewSettings.allCases.filter { $0 != .defaultObject } :
+            SetViewSettings.allCases.filter { $0 != .defaultObject &&  $0 != .defaultTemplate}
+        }.store(in: &cancellables)
     }
     
     private func updateDefaultTemplateValue(with title: String) {
@@ -188,17 +192,6 @@ final class SetViewSettingsListModel: ObservableObject {
         }
     }
     
-    private func updateDefaultObjectValue(with view: DataviewView) {
-        guard !setDocument.isTypeSet(),
-            defaultObjectValue == SetViewSettings.defaultObject.placeholder ||
-                view.defaultObjectTypeID != view.defaultObjectTypeID else { return }
-        let objectTypeId = view.defaultObjectTypeIDWithFallback
-        Task { @MainActor in
-            let objectDetails = try await templatesInteractor.objectDetails(for: objectTypeId)
-            defaultObjectValue = objectDetails.name
-        }
-    }
-    
     private func updateRelationsValue() {
         let visibleRelations = setDocument.sortedRelations(for: viewId).filter { $0.option.isVisible }
         let value = updatedValue(count: visibleRelations.count, firstName: visibleRelations.first?.relationDetails.name)
@@ -222,18 +215,6 @@ final class SetViewSettingsListModel: ObservableObject {
             return Loc.Set.View.Settings.Objects.Applied.title(count)
         } else {
             return nil
-        }
-    }
-    
-    func checkTemplatesAvailablility(details: ObjectDetails) {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            let isTemplatesAvailable = try await templatesInteractor.isTemplatesAvailableFor(
-                setObject: details
-            )
-            settings = isTemplatesAvailable ?
-            SetViewSettings.allCases.filter { $0 != .defaultObject } :
-            SetViewSettings.allCases.filter { $0 != .defaultObject &&  $0 != .defaultTemplate}
         }
     }
 }

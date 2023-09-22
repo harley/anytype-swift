@@ -532,7 +532,7 @@ extension EditorRouter: ObjectSettingsModuleDelegate {
     }
     
     func didCreateTemplate(templateId: BlockId) {
-        templateSelectionCoordinator.showTemplateEditing(blockId: templateId) { [weak self] templateSelection in
+        templateSelectionCoordinator.showTemplateEditing(objectTypeId: "", blockId: templateId) { [weak self] templateSelection in
             Task { @MainActor [weak self] in
                 do {
                     guard let type = self?.document.details?.type,

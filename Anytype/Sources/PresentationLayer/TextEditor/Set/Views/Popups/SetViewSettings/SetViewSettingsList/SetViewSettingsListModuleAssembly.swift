@@ -31,25 +31,19 @@ final class SetViewSettingsListModuleAssembly: SetViewSettingsListModuleAssembly
             objectId: setDocument.objectId,
             blockId: setDocument.blockId
         )
-        let templateInteractorProvider: TemplateSelectionInteractorProvider?
-        if setDocument.isTypeSet() {
-            templateInteractorProvider = DataviewTemplateSelectionInteractorProvider(
-                setDocument: setDocument,
-                viewId: viewId,
-                installedObjectTypesProvider: serviceLocator.installedObjectTypesProvider(),
-                subscriptionService: TemplatesSubscriptionService(subscriptionService: serviceLocator.subscriptionService()),
-                dataviewService: dataviewService
-            )
-        } else {
-            templateInteractorProvider = nil
-        }
+        let templateInteractorProvider = DataviewTemplateSelectionInteractorProvider(
+            setDocument: setDocument,
+            viewId: viewId,
+            installedObjectTypesProvider: serviceLocator.installedObjectTypesProvider(),
+            subscriptionService: TemplatesSubscriptionService(subscriptionService: serviceLocator.subscriptionService()),
+            dataviewService: dataviewService
+        )
         return SetViewSettingsList(
             model: SetViewSettingsListModel(
                 setDocument: setDocument,
                 viewId: viewId,
                 mode: mode,
                 dataviewService: dataviewService,
-                templatesInteractor: self.serviceLocator.setTemplatesInteractor,
                 templateInteractorProvider: templateInteractorProvider,
                 output: output
             )

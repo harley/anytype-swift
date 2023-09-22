@@ -3,23 +3,41 @@ import Services
 import SwiftUI
 import AnytypeCore
 
+enum SetObjectSettingsMode {
+    case create
+    case `default`
+    
+    var title: String {
+        switch self {
+        case .create:
+            return Loc.createObject
+        case .default:
+            return Loc.TemplateSelection.selectTemplate
+        }
+    }
+}
+
+
 protocol TemplateSelectionCoordinatorProtocol: AnyObject {
     @MainActor
     func showTemplatesSelection(
         setDocument: SetDocumentProtocol,
         viewId: String,
         floatingPanelStyle: Bool,
-        onTemplateSelection: @escaping (BlockId?) -> ()
+        onObjectTypeSelection: @escaping (BlockId?) -> (),
+        onTemplateSelection: @escaping (BlockId?, BlockId?) -> ()
     )
     
     func showTemplateEditing(
+        objectTypeId: BlockId,
         blockId: BlockId,
-        onTemplateSelection: @escaping (BlockId) -> Void,
+        onTemplateSelection: @escaping (BlockId, BlockId) -> Void,
         onSetAsDefaultTempalte: @escaping (BlockId) -> Void
     )
 }
 
 final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
+    private let mode: SetObjectSettingsMode
     private let navigationContext: NavigationContextProtocol
     private let templatesModuleAssembly: TemplateModulesAssembly
     private let editorAssembly: EditorAssembly
@@ -28,12 +46,14 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
     private var handler: TemplateSelectionObjectSettingsHandler?
     
     init(
+        mode: SetObjectSettingsMode,
         navigationContext: NavigationContextProtocol,
         templatesModulesAssembly: TemplateModulesAssembly,
         editorAssembly: EditorAssembly,
         newSearchModuleAssembly: NewSearchModuleAssemblyProtocol,
         objectSettingCoordinator: ObjectSettingsCoordinatorProtocol
     ) {
+        self.mode = mode
         self.navigationContext = navigationContext
         self.templatesModuleAssembly = templatesModulesAssembly
         self.newSearchModuleAssembly = newSearchModuleAssembly
@@ -46,33 +66,50 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
         setDocument: SetDocumentProtocol,
         viewId: String,
         floatingPanelStyle: Bool,
-        onTemplateSelection: @escaping (BlockId?) -> ()
+        onObjectTypeSelection: @escaping (BlockId?) -> (),
+        onTemplateSelection: @escaping (BlockId?, BlockId?) -> ()
     ) {
         let view = templatesModuleAssembly.buildTemplateSelection(
             setDocument: setDocument,
             viewId: viewId,
-            onTemplateSelection: { [weak navigationContext] templateId in
-                navigationContext?.dismissTopPresented(animated: true) {
-                    onTemplateSelection(templateId)
-                }
-            },
-            onObjectTypesSearchAction: { [weak self] in
-                self?.showTypesSearch(
-                    setDocument: setDocument,
-                    selectedObjectId: nil,
-                    onSelect: { _ in }
-                )
-            }
+            mode: mode
         )
         let model = view.model
         
+        view.model.onObjectTypeSelection = { objectTypeId in
+            onObjectTypeSelection(objectTypeId)
+        }
+        
+        view.model.onTemplateSelection = { [weak self] objectTypeId, templateId in
+            guard let self else { return }
+            switch mode {
+            case .create:
+                navigationContext.dismissTopPresented(animated: true) {
+                    onTemplateSelection(objectTypeId, templateId)
+                }
+            case .default:
+                onTemplateSelection(objectTypeId, templateId)
+            }
+        }
+        
         view.model.templateEditingHandler = { [weak self, weak model, weak navigationContext] templateId in
             self?.showTemplateEditing(
+                objectTypeId: "",
                 blockId: templateId,
                 onTemplateSelection: onTemplateSelection,
                 onSetAsDefaultTempalte: { templateId in
                     model?.setTemplateAsDefault(templateId: templateId)
                     navigationContext?.dismissTopPresented(animated: true, completion: nil)
+                }
+            )
+        }
+        
+        view.model.onObjectTypesSearchAction = { [weak self] in
+            self?.showTypesSearch(
+                setDocument: setDocument,
+                selectedObjectId: nil,
+                onSelect: { objectTypeId in
+                    onObjectTypeSelection(objectTypeId)
                 }
             )
         }
@@ -89,8 +126,9 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
     }
     
     func showTemplateEditing(
+        objectTypeId: BlockId,
         blockId: BlockId,
-        onTemplateSelection: @escaping (BlockId) -> Void,
+        onTemplateSelection: @escaping (BlockId, BlockId) -> Void,
         onSetAsDefaultTempalte: @escaping (BlockId) -> Void
     ) {
         let editorPage = editorAssembly.buildEditorModule(
@@ -112,8 +150,16 @@ final class TemplateSelectionCoordinator: TemplateSelectionCoordinatorProtocol {
                 
                 self.objectSettingCoordinator.startFlow(objectId: blockId, delegate: handler, output: nil)
             }, onSelectTemplateTap: { [weak self] in
-                self?.navigationContext.dismissAllPresented(animated: true) {
-                    onTemplateSelection(blockId)
+                guard let self else { return }
+                switch mode {
+                case .create:
+                    navigationContext.dismissAllPresented(animated: true) {
+                        onTemplateSelection(objectTypeId, blockId)
+                    }
+                case .default:
+                    navigationContext.dismissTopPresented(animated: true) {
+                        onTemplateSelection(objectTypeId, blockId)
+                    }
                 }
             }
         )

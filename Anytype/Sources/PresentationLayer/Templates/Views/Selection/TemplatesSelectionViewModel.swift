@@ -4,51 +4,44 @@ import Services
 import Combine
 import SwiftUI
 
-enum TemplatesSelectionMode {
-    case `default`
-    case objectType
-}
-
 @MainActor
 final class TemplatesSelectionViewModel: ObservableObject {
     @Published var isEditingState = false
     @Published var templates = [TemplatePreviewViewModel]()
     @Published var objectTypes = [InstalledObjectTypeViewModel]()
-    
     var isTemplatesAvailable = true
+    
+    var onObjectTypeSelection: ((BlockId?) -> Void)?
+    var onTemplateSelection: ((_ objectTypeId: BlockId?, _ templateId: BlockId?) -> Void)?
     var templateEditingHandler: RoutingAction<BlockId>?
+    var onObjectTypesSearchAction: (() -> Void)?
     
     private var userTemplates = [TemplatePreviewModel]() {
         didSet {
             updateTemplatesList()
         }
     }
+    private var selectedObjectTypeId: String = ""
     
-//    private let mode: TemplatesSelectionMode
+    private let mode: SetObjectSettingsMode
     private let interactor: TemplateSelectionInteractorProvider
     private let setDocument: SetDocumentProtocol
     private let templatesService: TemplatesServiceProtocol
     private let toastPresenter: ToastPresenterProtocol
-    private let onTemplateSelection: (BlockId?) -> Void
-    private let onObjectTypesSearchAction: () -> Void
     private var cancellables = [AnyCancellable]()
     
     init(
-//        mode: TemplatesSelectionMode,
+        mode: SetObjectSettingsMode,
         interactor: TemplateSelectionInteractorProvider,
         setDocument: SetDocumentProtocol,
         templatesService: TemplatesServiceProtocol,
-        toastPresenter: ToastPresenterProtocol,
-        onTemplateSelection: @escaping (BlockId?) -> Void,
-        onObjectTypesSearchAction: @escaping () -> Void
+        toastPresenter: ToastPresenterProtocol
     ) {
-//        self.mode = mode
+        self.mode = mode
         self.interactor = interactor
         self.setDocument = setDocument
         self.templatesService = templatesService
         self.toastPresenter = toastPresenter
-        self.onTemplateSelection = onTemplateSelection
-        self.onObjectTypesSearchAction = onObjectTypesSearchAction
         
         updateTemplatesList()
         setupSubscriptions()
@@ -57,13 +50,13 @@ final class TemplatesSelectionViewModel: ObservableObject {
     func onTemplateTap(model: TemplatePreviewModel) {
         switch model.mode {
         case .installed(let templateModel):
-            onTemplateSelection(templateModel.id)
+            onTemplateSelection?(selectedObjectTypeId, templateModel.id)
             AnytypeAnalytics.instance().logTemplateSelection(
                 objectType: templateModel.isBundled ? .object(typeId: templateModel.id) : .custom,
                 route: setDocument.isCollection() ? .collection : .set
             )
         case .blank:
-            onTemplateSelection("")
+            onTemplateSelection?(selectedObjectTypeId, "")
             AnytypeAnalytics.instance().logTemplateSelection(
                 objectType: nil,
                 route: setDocument.isCollection() ? .collection : .set
@@ -93,10 +86,8 @@ final class TemplatesSelectionViewModel: ObservableObject {
         }
     }
     
-    func setObjectTypeAsDefault(objectTypeId: BlockId) {
-        Task {
-            try await interactor.setDefaultObjectType(objectTypeId: objectTypeId)
-        }
+    func setSelectedObjectType(objectTypeId: BlockId) {
+        selectedObjectTypeId = objectTypeId
     }
     
     func setTemplateAsDefault(templateId: BlockId) {
@@ -126,20 +117,23 @@ final class TemplatesSelectionViewModel: ObservableObject {
                 $0.id == objectTypesConfig.defaultObjectTypeId.rawValue
             }
             isTemplatesAvailable = defaultObjectType?.recommendedLayout.isTemplatesAvailable ?? false
+            selectedObjectTypeId = selectedObjectTypeId.isEmpty ? objectTypesConfig.defaultObjectTypeId.rawValue : selectedObjectTypeId
             updateObjectTypes(objectTypesConfig)
         }.store(in: &cancellables)
     }
     
     private func updateObjectTypes(_ objectTypesConfig: ObjectTypesConfiguration) {
-        var convertedObjectTypes = objectTypesConfig.objectTypes.map { type in
-            let isSelected = type.id == objectTypesConfig.defaultObjectTypeId.rawValue
+        let selectedObjectTypeId = mode == .create ? selectedObjectTypeId : objectTypesConfig.defaultObjectTypeId.rawValue
+        var convertedObjectTypes = objectTypesConfig.objectTypes.map {  type in
+            let isSelected = type.id == selectedObjectTypeId
             return InstalledObjectTypeViewModel(
                 id: type.id,
                 icon: .object(.emoji(type.iconEmoji)),
                 title: type.name,
                 isSelected: isSelected,
                 onTap: { [weak self] in
-                    self?.setObjectTypeAsDefault(objectTypeId: type.id)
+                    self?.selectedObjectTypeId = type.id
+                    self?.onObjectTypeSelection?(type.id)
                 }
             )
         }
@@ -148,7 +142,9 @@ final class TemplatesSelectionViewModel: ObservableObject {
             icon: .asset(.X18.search),
             title: nil,
             isSelected: false,
-            onTap: onObjectTypesSearchAction
+            onTap: { [weak self] in
+                self?.onObjectTypesSearchAction?()
+            }
         )
         convertedObjectTypes.insert(searchItem, at: 0)
         self.objectTypes = convertedObjectTypes
