@@ -218,7 +218,9 @@ final class BaseDocument: BaseDocumentProtocol {
                 break
             case .details(let id):
                 if id == objectId {
-                    
+                    print("This object -> 000")
+                } else {
+                    print("Another object -> 000")
                 }
                 
                 // Document details usually updates after sync()

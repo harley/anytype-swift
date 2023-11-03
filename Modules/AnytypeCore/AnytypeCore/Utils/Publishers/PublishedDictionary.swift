@@ -36,4 +36,8 @@ public final class PassthroughSubjectDictionary<K, V> where K: Hashable, V: Equa
         guard let value = dictionary[key] else { return }
         value.sendUpdate()
     }
+    
+    public func removeAll() {
+        dictionary.removeAll()
+    }
 }

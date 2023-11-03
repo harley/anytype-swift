@@ -342,15 +342,19 @@ final class BlockViewModelBuilder {
                 focusSubject: subjectsHolder.focusSubject(for: info.id)
             )
         case let .dataView(data):
-            let details = document.detailsStorage.get(id: data.targetObjectID)
+            let objectDetailsProvider = ObjectDetailsInfomationProvider(
+                detailsStorage: document.detailsStorage,
+                targetObjectId: data.targetObjectID,
+                details: document.detailsStorage.get(id: data.targetObjectID)
+            )
             
-            if details?.isDeleted ?? false {
-                return NonExistentBlockViewModel(info: info)
-            }
             return DataViewBlockViewModel(
-                info: info,
-                objectDetails: details,
-                isCollection: data.isCollection,
+                blockInformationProvider: BlockModelInfomationProvider(
+                    infoContainer: infoContainer,
+                    info: info
+                ),
+                objectDetailsProvider: objectDetailsProvider,
+                reloadable: viewInput,
                 showFailureToast: { [weak self] message in
                     self?.router.showFailureToast(message: message)
                 },

@@ -1,12 +1,15 @@
 import Services
 import UIKit
 
+protocol EditorCollectionReloadable: AnyObject {
+    func reloadItems(items: [EditorItem])
+}
+
 /// Input data for document view
-protocol EditorPageViewInput: RelativePositionProvider {
+protocol EditorPageViewInput: RelativePositionProvider, EditorCollectionReloadable {
     
     func update(header: ObjectHeader)
     func update(details: ObjectDetails?, templatesCount: Int)
-    func reloadItems(items: [EditorItem])
     func update(
         changes: CollectionDifference<EditorItem>?,
         allModels: [EditorItem],
