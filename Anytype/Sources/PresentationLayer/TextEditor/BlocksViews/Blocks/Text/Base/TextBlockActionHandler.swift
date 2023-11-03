@@ -33,8 +33,7 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
     private let markdownListener: MarkdownListener
     private let keyboardHandler: KeyboardActionHandlerProtocol
     private let slashMenuActionHandler: SlashMenuActionHandler
-    
-    weak private var viewInput: EditorPageViewInput?
+    private let collectionController: EditorCollectionReloadable
     
     private let cursorManager: EditorCursorManager
     private let accessoryViewStateManager: AccessoryViewStateManager
@@ -58,7 +57,7 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
         actionHandler: BlockActionHandlerProtocol,
         pasteboardService: PasteboardServiceProtocol,
         markdownListener: MarkdownListener,
-        viewInput: EditorPageViewInput?,
+        collectionController: EditorCollectionReloadable,
         cursorManager: EditorCursorManager,
         accessoryViewStateManager: AccessoryViewStateManager,
         keyboardHandler: KeyboardActionHandlerProtocol,
@@ -79,7 +78,7 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
         self.actionHandler = actionHandler
         self.pasteboardService = pasteboardService
         self.markdownListener = markdownListener
-        self.viewInput = viewInput
+        self.collectionController = collectionController
         self.cursorManager = cursorManager
         self.accessoryViewStateManager = accessoryViewStateManager
         self.keyboardHandler = keyboardHandler
@@ -353,7 +352,7 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
     }
 
     private func textBlockSetNeedsLayout(textView: UITextView) {
-        viewInput?.blockDidChangeFrame()
+        collectionController.blockDidChangeFrame()
     }
 
     private func textViewDidChangeText(textView: UITextView) {
@@ -368,25 +367,25 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
     }
 
     private func textViewWillBeginEditing(textView: UITextView) {
-        viewInput?.textBlockWillBeginEditing()
+        collectionController.textBlockWillBeginEditing()
         accessoryViewStateManager.willBeginEditing(with: accessoryConfiguration(using: textView))
     }
 
     private func textViewDidBeginEditing(textView: UITextView) {
-        viewInput?.textBlockDidBeginEditing(firstResponderView: textView)
+        collectionController.textBlockDidBeginEditing(firstResponderView: textView)
     }
 
     private func textViewDidEndEditing(textView: UITextView) {
         let configuration = accessoryConfiguration(using: textView)
         
-        viewInput?.blockDidFinishEditing()
+        collectionController.blockDidFinishEditing()
         accessoryViewStateManager.didEndEditing(with: configuration)
     }
 
     private func textViewDidChangeCaretPosition(textView: UITextView, range: NSRange) {
         accessoryViewStateManager.selectionDidChange(range: range)
 //        cursorManager.didChangeCursorPosition(at: data.info.id, position: .at(range)) // DO WE NEED IT? WHY?
-        viewInput?.didSelectTextRangeSelection(blockId: info.id, textView: textView)
+        collectionController.didSelectTextRangeSelection(blockId: info.id, textView: textView)
     }
 
     private func toggleCheckBox() {

@@ -19,7 +19,7 @@ final class BlockViewModelBuilder {
     private let tableService: BlockTableServiceProtocol
     private let objectTypeProvider: ObjectTypeProviderProtocol
     private let modelsHolder: EditorMainItemModelsHolder
-    private weak var viewInput: EditorPageViewInput?
+    private let blockCollectionController: EditorBlockCollectionController
     private let accessoryStateManager: AccessoryViewStateManager
     private let cursorManager: EditorCursorManager
     private let keyboardActionHandler: KeyboardActionHandlerProtocol
@@ -45,7 +45,7 @@ final class BlockViewModelBuilder {
         tableService: BlockTableServiceProtocol,
         objectTypeProvider: ObjectTypeProviderProtocol,
         modelsHolder: EditorMainItemModelsHolder,
-        viewInput: EditorPageViewInput?,
+        blockCollectionController: EditorBlockCollectionController,
         accessoryStateManager: AccessoryViewStateManager,
         cursorManager: EditorCursorManager,
         keyboardActionHandler: KeyboardActionHandlerProtocol,
@@ -69,7 +69,7 @@ final class BlockViewModelBuilder {
         self.tableService = tableService
         self.objectTypeProvider = objectTypeProvider
         self.modelsHolder = modelsHolder
-        self.viewInput = viewInput
+        self.blockCollectionController = blockCollectionController
         self.accessoryStateManager = accessoryStateManager
         self.cursorManager = cursorManager
         self.keyboardActionHandler = keyboardActionHandler
@@ -170,7 +170,7 @@ final class BlockViewModelBuilder {
                     actionHandler: handler,
                     pasteboardService: pasteboardService,
                     markdownListener: markdownListener,
-                    viewInput: viewInput,
+                    collectionController: blockCollectionController,
                     cursorManager: cursorManager,
                     accessoryViewStateManager: accessoryStateManager,
                     keyboardHandler: keyboardActionHandler,
@@ -277,14 +277,10 @@ final class BlockViewModelBuilder {
                 }
             )
         case .featuredRelations:
-            guard let objectType = document.details?.objectType else { return nil }
-            
-            let featuredRelationValues = document.featuredRelationsForEditor
             return FeaturedRelationsBlockViewModel(
-                info: info,
-                featuredRelationValues: featuredRelationValues,
-                type: objectType.name,
-                blockDelegate: delegate
+                infoProvider: blockInformationProvider,
+                document: document,
+                collectionController: blockCollectionController
             ) { [weak self] relation in
                 guard let self = self else { return }
                 let bookmarkFilter = self.document.details?.layoutValue != .bookmark
@@ -350,7 +346,7 @@ final class BlockViewModelBuilder {
                     info: info
                 ),
                 objectDetailsProvider: objectDetailsProvider,
-                reloadable: viewInput,
+                reloadable: blockCollectionController,
                 showFailureToast: { [weak self] message in
                     self?.router.showFailureToast(message: message)
                 },

@@ -343,7 +343,7 @@ final class EditorAssembly {
             tableService: blockTableService,
             objectTypeProvider: serviceLocator.objectTypeProvider(),
             modelsHolder: modelsHolder,
-            viewInput: viewInput,
+            blockCollectionController: .init(viewInput: viewInput),
             accessoryStateManager: accessoryState,
             cursorManager: cursorManager,
             keyboardActionHandler: keyboardHandler,

@@ -401,7 +401,6 @@ extension EditorPageController: EditorPageViewInput {
     }
 
     func blockDidChangeFrame() {
-//        debouncer.debounce(milliseconds: 100) { [weak self] in
         DispatchQueue.main.async { [weak self] in
             
             printTimeElapsedWhenRunningCode(title: "dataSource.apply") { [weak self] in
@@ -412,12 +411,6 @@ extension EditorPageController: EditorPageViewInput {
                 self.dataSource.apply(currentSnapshot, animatingDifferences: false)
             }
         }
-//            }
-//        }
-    }
-
-    func textBlockDidChangeText() {
-        // For future changes
     }
 
     func blockDidFinishEditing() {

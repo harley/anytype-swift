@@ -51,8 +51,6 @@ final class BlockDelegateImpl: BlockDelegate {
     }
     
     func textDidChange(data: TextViewAccessoryConfiguration) {
-        viewInput?.textBlockDidChangeText()
-
         guard let changeType = changeType else { return }
 
         accessoryState.textDidChange(changeType: changeType)

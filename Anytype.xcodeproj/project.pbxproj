@@ -1347,6 +1347,7 @@
 		8639E0142A6020E700F52ED2 /* TemplatesSubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8639E0132A6020E700F52ED2 /* TemplatesSubscriptionService.swift */; };
 		863DB2942AB320D800CB6914 /* HeaderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863DB2932AB320D700CB6914 /* HeaderBuilder.swift */; };
 		864F93D92AA5EC94008AA9E7 /* SharedContentSaveOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 864F93D82AA5EC94008AA9E7 /* SharedContentSaveOption.swift */; };
+		86579BC42AF4ED7A00D65714 /* EditorBlockCollectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86579BC32AF4ED7A00D65714 /* EditorBlockCollectionController.swift */; };
 		866B43082ABAE4C10028DDAE /* ObjectHeaderInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866B43072ABAE4C10028DDAE /* ObjectHeaderInteractor.swift */; };
 		8673528B2AA8BC00003F92DC /* URL+Middleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8673528A2AA8BC00003F92DC /* URL+Middleware.swift */; };
 		8673528D2AA8BF2C003F92DC /* WrappedSearchInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8673528C2AA8BF2C003F92DC /* WrappedSearchInteractor.swift */; };
@@ -2967,6 +2968,7 @@
 		8639E0132A6020E700F52ED2 /* TemplatesSubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplatesSubscriptionService.swift; sourceTree = "<group>"; };
 		863DB2932AB320D700CB6914 /* HeaderBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderBuilder.swift; sourceTree = "<group>"; };
 		864F93D82AA5EC94008AA9E7 /* SharedContentSaveOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedContentSaveOption.swift; sourceTree = "<group>"; };
+		86579BC32AF4ED7A00D65714 /* EditorBlockCollectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorBlockCollectionController.swift; sourceTree = "<group>"; };
 		866B43072ABAE4C10028DDAE /* ObjectHeaderInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectHeaderInteractor.swift; sourceTree = "<group>"; };
 		8673528A2AA8BC00003F92DC /* URL+Middleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Middleware.swift"; sourceTree = "<group>"; };
 		8673528C2AA8BF2C003F92DC /* WrappedSearchInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrappedSearchInteractor.swift; sourceTree = "<group>"; };
@@ -6942,6 +6944,7 @@
 			isa = PBXGroup;
 			children = (
 				0ACC357525C851650003CF3A /* BlockViewModelBuilder.swift */,
+				86579BC32AF4ED7A00D65714 /* EditorBlockCollectionController.swift */,
 				C961581F27AC2AD400AE8848 /* FocusSubjectsHolder.swift */,
 				12A8CCED26BD5F3B00090468 /* EditorItem.swift */,
 				126C46D226BD909300D31DBF /* EditorSection.swift */,
@@ -10839,6 +10842,7 @@
 				2A816AC92AD7DFC700975BCA /* ServerConfigurationView.swift in Sources */,
 				12A7B6C126C3E47200544037 /* DocumentCover.swift in Sources */,
 				53D408AC27F0B7EE00495335 /* CodeBlockFields.swift in Sources */,
+				86579BC42AF4ED7A00D65714 /* EditorBlockCollectionController.swift in Sources */,
 				1219F971269350A5009DE4D4 /* ObjectIcon.swift in Sources */,
 				2A2C331D2892B627008BC326 /* RelationValueModuleAssembly.swift in Sources */,
 				2ADA5EEA28A292D000CD82A4 /* FeatureFlagViewModel.swift in Sources */,
