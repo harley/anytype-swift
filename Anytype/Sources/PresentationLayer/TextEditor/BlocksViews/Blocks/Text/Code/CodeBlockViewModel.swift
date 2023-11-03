@@ -3,24 +3,27 @@ import UIKit
 import Services
 
 struct CodeBlockViewModel: BlockViewModelProtocol {    
-    var hashable: AnyHashable {
-        [
-            info,
-            codeLanguage
-        ] as [AnyHashable]
-    }
+    var hashable: AnyHashable { info.id }
+    var info: BlockInformation { infoProvider.info }
     
-    let info: BlockInformation
-    let content: BlockText
-    let anytypeText: UIKitAnytypeText
-    let codeLanguage: CodeLanguage
-
+    let infoProvider: BlockModelInfomationProvider
+    let document: BaseDocumentProtocol
+    
     let becomeFirstResponder: (BlockInformation) -> ()
     let textDidChange: (BlockInformation, UITextView) -> ()
-    let showCodeSelection: (BlockInformation) -> ()
+    let showCodeSelection: (BlockInformation, CodeLanguage) -> ()
 
-    func makeContentConfiguration(maxWidth _ : CGFloat) -> UIContentConfiguration {
-        CodeBlockContentConfiguration(
+    func makeContentConfiguration(maxWidth width: CGFloat) -> UIContentConfiguration {
+        guard case let .text(content) = info.content else {
+            return UnsupportedBlockViewModel(info: info).makeContentConfiguration(maxWidth: width)
+        }
+        
+        let anytypeText = content.anytypeText(document: document)
+        let codeLanguage = CodeLanguage.create(
+            middleware: info.fields[CodeBlockFields.FieldName.codeLanguage]?.stringValue
+        )
+        
+        return CodeBlockContentConfiguration(
             content: content,
             anytypeText: anytypeText,
             backgroundColor: info.backgroundColor,
@@ -28,7 +31,7 @@ struct CodeBlockViewModel: BlockViewModelProtocol {
             actions: .init(
                 becomeFirstResponder: { becomeFirstResponder(info) },
                 textDidChange: { textView in textDidChange(info, textView) },
-                showCodeSelection: { showCodeSelection(info) }
+                showCodeSelection: { showCodeSelection(info, codeLanguage) }
             )
         ).cellBlockConfiguration(
             dragConfiguration: .init(id: info.id),
@@ -43,6 +46,6 @@ struct CodeBlockViewModel: BlockViewModelProtocol {
 
 extension CodeBlockViewModel: CustomDebugStringConvertible {
     var debugDescription: String {
-        return "id: \(blockId)\ntext: \(anytypeText.attrString.string.prefix(10))...\ntype: \(info.content.type.styleAnalyticsValue)"
+        return "id: \(blockId)"
     }
 }

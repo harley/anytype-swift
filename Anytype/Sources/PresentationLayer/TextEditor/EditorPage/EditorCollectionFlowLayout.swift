@@ -242,6 +242,16 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
         } else if let indexPaths = context.invalidatedItemIndexPaths {
             indexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
         }
+        
+        if context.invalidateDataSourceCounts {
+            if let allIndexPaths = collectionView?.allIndexPaths {
+                let cachedIndexPaths = Set(cachedAttributes.keys)
+                let currentIndexPaths = Set(allIndexPaths)
+                
+                let substractedIndexPaths = currentIndexPaths.subtracting(cachedIndexPaths)
+                substractedIndexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
+            }
+        }
     }
     
     private func additionalHeight(for indexPath: IndexPath) -> CGFloat {
@@ -370,5 +380,19 @@ extension Array where Element == BlockIndentationStyle {
         reduce(into: CGFloat(0)) { partialResult, f in
             partialResult = partialResult + f.extraHeight
         }
+    }
+}
+
+extension UICollectionView {
+    var allIndexPaths: [IndexPath] {
+        var indexPaths: [IndexPath] = []
+        
+        for s in 0..<numberOfSections {
+            for i in 0..<numberOfItems(inSection: s) {
+                indexPaths.append(IndexPath(row: i, section: s))
+            }
+        }
+        
+        return indexPaths
     }
 }

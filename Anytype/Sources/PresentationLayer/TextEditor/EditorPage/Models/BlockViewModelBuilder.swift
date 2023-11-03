@@ -104,7 +104,6 @@ final class BlockViewModelBuilder {
     private func build(_ ids: [BlockId]) -> [BlockViewModelProtocol] {
         ids.compactMap {
             let block = build(id: $0)
-            modelsHolder.blocksMapping[$0] = block
             return block
         }
     }
@@ -117,25 +116,22 @@ final class BlockViewModelBuilder {
         guard let info = infoContainer.get(id: id) else {
             return nil
         }
+        
+        let blockInformationProvider = BlockModelInfomationProvider(infoContainer: infoContainer, info: info)
   
         switch info.content {
         case let .text(content):
             switch content.contentType {
             case .code:
-                let codeLanguage = CodeLanguage.create(
-                    middleware: info.fields[CodeBlockFields.FieldName.codeLanguage]?.stringValue
-                )
                 return CodeBlockViewModel(
-                    info: info,
-                    content: content,
-                    anytypeText: content.anytypeText(document: document),
-                    codeLanguage: codeLanguage,
+                    infoProvider: blockInformationProvider,
+                    document: document,
                     becomeFirstResponder: { _ in },
                     textDidChange: { [weak self] block, textView in
                         self?.handler.changeText(textView.textStorage, blockId: info.id)
                         self?.delegate.textBlockSetNeedsLayout()
                     },
-                    showCodeSelection: { [weak self] info in
+                    showCodeSelection: { [weak self] info, codeLanguage in
                         self?.router.showCodeLanguage(blockId: info.id, selectedLanguage: codeLanguage)
                     }
                 )
@@ -187,7 +183,7 @@ final class BlockViewModelBuilder {
                 
                 return TextBlockViewModel(
                     document: document,
-                    blockInformationProvider: BlockModelInfomationProvider(infoContainer: infoContainer, info: info),
+                    blockInformationProvider: blockInformationProvider,
                     stylePublisher: document.detailsPublisher
                         .receiveOnMain()
                         .compactMap { $0.layoutValue == .todo ? .todo : .none }
