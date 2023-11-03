@@ -8,6 +8,6 @@ enum TableOfContentData: Equatable {
 
 struct TableOfContentItem: Equatable, Hashable {
     let blockId: BlockId
-    let title: String
+    @Published let title: String
     let level: Int
 }

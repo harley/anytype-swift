@@ -179,8 +179,6 @@ final class BlockViewModelBuilder {
                     slashMenuActionHandler: slashMenuActionHandler
                 )
                 
-                
-                
                 return TextBlockViewModel(
                     document: document,
                     blockInformationProvider: blockInformationProvider,

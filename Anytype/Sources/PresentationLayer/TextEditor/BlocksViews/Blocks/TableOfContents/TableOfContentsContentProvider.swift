@@ -28,29 +28,38 @@ final class TableOfContentsContentProvider {
         updateContent()
         
         #warning("Make TOC great again")
+        document.flattenBlockIds.sink { [weak self] _ in
+            self?.updateContent()
+        }.store(in: &subscriptions)
+        
+        document.resetBlocksSubject.sink { [weak self] _ in
+            self?.updateContent()
+        }.store(in: &subscriptions)
 //        document.updatePublisher.sink { [weak self] in
 //            self?.handleUpdate(updateResult: $0)
 //        }.store(in: &subscriptions)
     }
     
-    private func handleUpdate(updateResult: DocumentUpdate) {
-        switch updateResult {
-        case let .blocks(updatedIds):
-            for blockId in updatedIds {
-                guard let info = document.infoContainer.get(id: blockId),
-                      case let .text(content) = info.content,
-                      Constants.sortedHeaderStyles.contains(content.contentType) else { continue }
-                updateContent()
-                break
-            }
-        case .general, .children:
-            updateContent()
-        case .syncStatus, .details, .unhandled:
-            break
-        }
-    }
+//    private func handleUpdate(updateResult: DocumentUpdate) {
+//        switch updateResult {
+//        case let .blocks(updatedIds):
+//            for blockId in updatedIds {
+//                guard let info = document.infoContainer.get(id: blockId),
+//                      case let .text(content) = info.content,
+//                      Constants.sortedHeaderStyles.contains(content.contentType) else { continue }
+//                updateContent()
+//                break
+//            }
+//        case .general, .children:
+//            updateContent()
+//        case .syncStatus, .details, .unhandled:
+//            break
+//        }
+//    }
     
     private func updateContent() {
+        // Remove all subscriptions
+        
         let newContent = buildTableOfContents()
         guard newContent != content else { return }
         content = newContent
@@ -66,6 +75,10 @@ final class TableOfContentsContentProvider {
                 guard let position = Constants.sortedHeaderStyles.firstIndex(of: content.contentType) else {
                     continue
                 }
+                
+                // Subscription on infocontainer child
+                
+                
                 let depth = hasHeader[0..<position].filter { $0 }.count
                 hasHeader[position] = true
                 for index in position+1..<hasHeader.count {
@@ -73,6 +86,8 @@ final class TableOfContentsContentProvider {
                 }
                 let title = content.text.isEmpty ? Loc.Object.Title.placeholder : content.text
                 items.append(TableOfContentItem(blockId: child.id, title: title, level: depth))
+                
+                
             default:
                 break
             }
