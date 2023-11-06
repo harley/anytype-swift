@@ -25,7 +25,6 @@ final class CustomInvalidation: UICollectionViewLayoutInvalidationContext {
     }
 }
 
-// `UICollectionViewLayout` that basically mimics behavior of `UITableView`
 public final class EditorCollectionFlowLayout: UICollectionViewLayout {
     var document: BaseDocumentProtocol? {
         didSet {
@@ -40,9 +39,8 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
                             invalidationIndexPaths.append(key)
                         }
                     }
-                    
-//                    self?.invalidateLayout(with: CustomInvalidation(indexPaths: invalidationIndexPaths))
                     self?.nestedIndexPaths = rowInformation
+                    self?.invalidateLayout(with: CustomInvalidation(indexPaths: invalidationIndexPaths))
                 }
         }
     }

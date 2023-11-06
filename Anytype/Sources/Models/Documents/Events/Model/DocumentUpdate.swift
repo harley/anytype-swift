@@ -16,7 +16,7 @@ enum DocumentUpdate: Hashable {
         case let .blocks(blockIds):
             return !blockIds.isEmpty
         case .unhandled:
-            return false
+            return true
         }
     }
 }

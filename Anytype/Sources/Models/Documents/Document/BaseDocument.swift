@@ -214,7 +214,9 @@ final class BaseDocument: BaseDocumentProtocol {
             case .blocks(let blockIds):
                 blockIds.forEach { infoContainer.publishValue(for: $0) }
                 _resetBlocksSubject.send(blockIds)
-            case .syncStatus, .unhandled:
+            case .unhandled(let blockIds):
+                blockIds.forEach { infoContainer.publishValue(for: $0) }
+            case .syncStatus:
                 break
             case .details(let id):
                 if id == objectId {
