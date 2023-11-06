@@ -246,9 +246,12 @@ final class BlockViewModelBuilder {
             }
             
             return BlockBookmarkViewModel(
-                info: info,
-                bookmarkData: data,
-                objectDetails: details,
+                editorCollectionController: blockCollectionController, objectDetailsProvider: ObjectDetailsInfomationProvider(
+                    detailsStorage: document.detailsStorage,
+                    targetObjectId: data.targetObjectID,
+                    details: details
+                ),
+                infoProvider: blockInformationProvider,
                 showBookmarkBar: { [weak self] info in
                     self?.showBookmarkBar(info: info)
                 },

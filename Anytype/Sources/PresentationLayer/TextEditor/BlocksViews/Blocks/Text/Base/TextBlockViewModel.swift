@@ -3,7 +3,7 @@ import UIKit
 import Services
 
 final class BlockModelInfomationProvider {
-    private(set) var info: BlockInformation
+    @Published private(set) var info: BlockInformation
     
     private let infoContainer: InfoContainerProtocol
     private var subscription: AnyCancellable?
