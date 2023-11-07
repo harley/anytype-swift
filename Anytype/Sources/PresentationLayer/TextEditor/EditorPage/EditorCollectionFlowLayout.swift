@@ -180,7 +180,9 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
     }
     
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        guard let itemAttrs = cachedAttributes[indexPath]?.attributes(indexPath: indexPath, collectionViewWidth: collectionViewWidth) else { return nil }
+        guard let itemAttrs = cachedAttributes[indexPath]?.attributes(indexPath: indexPath, collectionViewWidth: collectionViewWidth) else {
+            return estimatedAttributes(for: indexPath)
+        }
         
         let indentation = nestedIndexPaths[itemAttrs.indexPath]?.indentations.totalIndentation ?? 0
         
@@ -191,6 +193,24 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
                 height: itemAttrs.frame.height + additionalHeight(for: itemAttrs.indexPath)
             )
         )
+        
+        itemAttrs.frame = frame
+        
+        return itemAttrs
+    }
+    
+    private func estimatedAttributes(for indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        guard indexPath.row > 0 else { return nil }
+        let previousIndexPath = IndexPath(row: indexPath.row - 1, section: indexPath.section)
+        
+        guard let itemAttrs = cachedAttributes[previousIndexPath]?
+            .attributes(
+                indexPath: previousIndexPath,
+                collectionViewWidth: collectionViewWidth
+            ) else { return nil }
+        
+        var frame = itemAttrs.frame
+        frame.origin = .init(x: frame.origin.x, y: frame.origin.y + frame.height)
         
         itemAttrs.frame = frame
         

@@ -302,14 +302,18 @@ final class BlockViewModelBuilder {
             let relation = document.parsedRelations.all.first {
                 $0.key == content.key
             }
-            
+
             guard let relation = relation else {
                 return nil
             }
             
             return RelationBlockViewModel(
-                info: info,
-                relation: relation
+                blockInformationProvider: blockInformationProvider,
+                relationProvider: RelationProvider(
+                    relation: relation,
+                    relationPublisher: document.parsedRelationsPublisher
+                ),
+                collectionController: blockCollectionController
             ) { [weak self] in
                 self?.router.showRelationValueEditingView(key: relation.key)
             }
