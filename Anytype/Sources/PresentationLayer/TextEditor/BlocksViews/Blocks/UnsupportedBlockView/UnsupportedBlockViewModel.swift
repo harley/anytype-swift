@@ -5,11 +5,7 @@ import AnytypeCore
 struct UnsupportedBlockViewModel: BlockViewModelProtocol {
     let info: BlockInformation
 
-    var hashable: AnyHashable {
-        [
-            info
-        ] as [AnyHashable]
-    }
+    var hashable: AnyHashable { info.id }
 
     init(info: BlockInformation) {
         self.info = info

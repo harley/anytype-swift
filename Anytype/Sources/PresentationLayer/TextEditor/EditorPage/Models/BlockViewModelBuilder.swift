@@ -194,8 +194,7 @@ final class BlockViewModelBuilder {
             switch content.contentType {
             case .file, .none:
                 return BlockFileViewModel(
-                    info: info,
-                    fileData: content,
+                    informationProvider: blockInformationProvider,
                     handler: handler,
                     showFilePicker: { [weak self] blockId in
                         self?.showFilePicker(blockId: blockId)
@@ -206,20 +205,16 @@ final class BlockViewModelBuilder {
                 )
             case .image:
                 return BlockImageViewModel(
-                    info: info,
-                    fileData: content,
+                    blockInformationProvider: blockInformationProvider,
                     handler: handler,
                     showIconPicker: { [weak self] blockId in
                         self?.showMediaPicker(type: .images, blockId: blockId)
                     },
                     onImageOpen: router.openImage
                 )
-                
-                
             case .video:
                 return VideoBlockViewModel(
-                    info: info,
-                    fileData: content,
+                    informantionProvider: blockInformationProvider,
                     audioSessionService: audioSessionService,
                     showVideoPicker: { [weak self] blockId in
                         self?.showMediaPicker(type: .videos, blockId: blockId)
@@ -227,8 +222,7 @@ final class BlockViewModelBuilder {
                 )
             case .audio:
                 return AudioBlockViewModel(
-                    info: info,
-                    fileData: content,
+                    informationProvider: blockInformationProvider,
                     audioSessionService: audioSessionService,
                     showAudioPicker: { [weak self] blockId in
                         self?.showFilePicker(blockId: blockId, types: [.audio])
@@ -269,9 +263,13 @@ final class BlockViewModelBuilder {
             }
             
             return BlockLinkViewModel(
-                info: info,
-                content: content,
-                details: details,
+                informationProvider: blockInformationProvider,
+                objectDetailsProvider: ObjectDetailsInfomationProvider(
+                    detailsStorage: document.detailsStorage,
+                    targetObjectId: content.targetBlockID,
+                    details: details
+                ),
+                blocksController: blockCollectionController,
                 detailsService: detailsService,
                 openLink: { [weak self] data in
                     self?.router.showPage(data: data)
