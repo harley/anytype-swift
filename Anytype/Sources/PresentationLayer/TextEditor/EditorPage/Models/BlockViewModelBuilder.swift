@@ -235,8 +235,8 @@ final class BlockViewModelBuilder {
                     }
                 )
             }
-        case .divider(let content):
-            return DividerBlockViewModel(content: content, info: info)
+        case .divider:
+            return DividerBlockViewModel(blockInformationProvider: blockInformationProvider)
         case let .bookmark(data):
             
             let details = document.detailsStorage.get(id: data.targetObjectID)
