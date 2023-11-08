@@ -5,7 +5,7 @@ import AnytypeCore
 import SwiftUI
 
 enum EditorPageConfigurationConstants {
-    static let dataSourceAnimationEnabled = false
+    static let dataSourceAnimationEnabled = true
 }
 
 final class EditorPageController: UIViewController {

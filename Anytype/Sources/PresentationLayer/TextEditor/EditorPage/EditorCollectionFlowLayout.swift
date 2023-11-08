@@ -3,14 +3,42 @@ import Combine
 import Services
 
 struct RowInformation: Equatable, Hashable {
+    let id: BlockId // There is a cache hash table inside FlowLayout,
     let allChildIndexPaths: [IndexPath] // It should contain all the Childs recursively
     let indentations: [BlockIndentationStyle] // It should represent how deep the child is
     let ownStyle: BlockIndentationStyle
 }
 
-enum EditorFlowLayoutPaddings {
-    static let `default`: CGFloat = 20
-    static let quote: CGFloat = 48
+/// Object representing position and height of item
+private struct LayoutItem {
+    /// Y coordinate of item
+    var y: CGFloat
+    /// Height of item
+    var height: CGFloat
+    var zIndex: Int
+    
+    /// Creates layout attributes for item at given indexPath
+    func attributes(indexPath: IndexPath, collectionViewWidth: CGFloat) -> UICollectionViewLayoutAttributes {
+        let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+        attributes.frame = CGRect(
+            x: 0,
+            y: y,
+            width: collectionViewWidth,
+            height: height
+        )
+        // If you don't set zIndex you can ocassionally end up with incorrect initial layout size
+        attributes.zIndex = zIndex
+        return attributes
+    }
+}
+
+private enum LayoutConstants {
+    enum Paddings {
+        static let `default`: CGFloat = 20
+        static let quote: CGFloat = 48
+    }
+    
+    static let estimatedItemHeight: CGFloat = 32
 }
 
 final class CustomInvalidation: UICollectionViewLayoutInvalidationContext {
@@ -35,45 +63,26 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
                     var invalidationIndexPaths = [IndexPath]()
                     
                     self?.nestedIndexPaths.forEach { key, value in
-                        if rowInformation[key] != value {
-                            invalidationIndexPaths.append(key)
+                        if let info = rowInformation[key] {
+                            if info != value {
+                                invalidationIndexPaths.append(key)
+                            }
                         }
                     }
                     self?.nestedIndexPaths = rowInformation
-                    self?.invalidateLayout(with: CustomInvalidation(indexPaths: invalidationIndexPaths))
+                    
+                    if invalidationIndexPaths.isNotEmpty {
+                        self?.invalidateLayout(with: CustomInvalidation(indexPaths: invalidationIndexPaths))
+                        
+                    }
+                    
                 }
         }
     }
     
     private var nestedIndexPaths = [IndexPath: RowInformation]()
+    private var heightCache = [AnyHashable: CGFloat]()
     private var rowInformationSubscription: AnyCancellable?
- 
-    
-    /// Object representing position and height of item
-    private struct LayoutItem {
-        /// Y coordinate of item
-        var y: CGFloat
-        /// Height of item
-        var height: CGFloat
-        var zIndex: Int
-        
-        /// Creates layout attributes for item at given indexPath
-        func attributes(indexPath: IndexPath, collectionViewWidth: CGFloat) -> UICollectionViewLayoutAttributes {
-            let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-            attributes.frame = CGRect(
-                x: 0,
-                y: y,
-                width: collectionViewWidth,
-                height: height
-            )
-            // If you don't set zIndex you can ocassionally end up with incorrect initial layout size
-            attributes.zIndex = zIndex
-            return attributes
-        }
-    }
-    
-    /// Height that is used as estimate if cell item has no computed height
-    public var estimatedItemHeight: CGFloat = 32
     
     public override var collectionViewContentSize: CGSize {
         CGSize(width: collectionViewWidth, height: collectionViewHeight)
@@ -132,14 +141,19 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
                 if var layoutItem = cachedAttributes[indexPath] {
                     layoutItem.y = offset
                     layoutItem.zIndex = zIndex
+                    layoutItem.height = heightCache(for: indexPath) ?? layoutItem.height
                     cachedAttributes[indexPath] = layoutItem
+                    
                     offset += layoutItem.height // do not forget to increase offset for next item
                 } else { // If there is no cached attributes, we need to create new attributes with estimated height
-                    cachedAttributes[indexPath] = LayoutItem(y: offset, height: estimatedItemHeight, zIndex: zIndex)
-                    offset += estimatedItemHeight // do not forget to increase offset for next item
+                    cachedAttributes[indexPath] = LayoutItem(
+                        y: offset,
+                        height: heightCache(for: indexPath) ?? LayoutConstants.estimatedItemHeight,
+                        zIndex: zIndex
+                    )
+
+                    offset += LayoutConstants.estimatedItemHeight // do not forget to increase offset for next item
                 }
-                
-              
                                 
                 zIndex += 1
             }
@@ -150,6 +164,14 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
         // will not be called as often as it should
         collectionViewWidth = collectionView.map { $0.bounds.width - .leastNonzeroMagnitude } ?? 0
         collectionViewHeight = offset
+    }
+    
+    private func heightCache(for indexPath: IndexPath) -> CGFloat? {
+        guard let rowInformation = nestedIndexPaths[indexPath] else {
+            return nil
+        }
+        
+        return heightCache[rowInformation]
     }
     
     public override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
@@ -239,8 +261,8 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
         let heightDiff = originalAttributes.frame.height - preferredAttributes.frame.height
         
         // If item is above top edge, we need to update scroll offset so it is preserved
-        let isAboveTopEdge = preferredAttributes.frame.minY < (collectionView?.bounds.minY ?? 0)
-        context.contentOffsetAdjustment.y -= isAboveTopEdge ? -heightDiff : 0
+//        let isAboveTopEdge = preferredAttributes.frame.minY < (collectionView?.bounds.minY ?? 0)
+//        context.contentOffsetAdjustment.y -= isAboveTopEdge ? -heightDiff : 0
         
         // When item height is changed we also need to update collectionView's contentSize
         context.contentSizeAdjustment.height -= heightDiff
@@ -249,6 +271,12 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
         // Finally we need to update cached height, in more complex layout it would be better
         // to do it in a better place (e.g. `prepare()`,
         cachedAttributes[preferredAttributes.indexPath]?.height = preferredAttributes.frame.height
+        
+        if let rowsInformation = nestedIndexPaths[preferredAttributes.indexPath] {
+            heightCache[rowsInformation] = preferredAttributes.frame.height
+        }
+        
+        
         return context
     }
     
@@ -256,20 +284,20 @@ public final class EditorCollectionFlowLayout: UICollectionViewLayout {
         super.invalidateLayout(with: context)
         
         if context.invalidateEverything {
-            cachedAttributes.removeAll()
+//            cachedAttributes.removeAll()
         } else if let indexPaths = context.invalidatedItemIndexPaths {
-            indexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
+//            indexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
         }
         
-        if context.invalidateDataSourceCounts {
-            if let allIndexPaths = collectionView?.allIndexPaths {
-                let cachedIndexPaths = Set(cachedAttributes.keys)
-                let currentIndexPaths = Set(allIndexPaths)
-                
-                let substractedIndexPaths = currentIndexPaths.subtracting(cachedIndexPaths)
-                substractedIndexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
-            }
-        }
+//        if context.invalidateDataSourceCounts {
+//            if let allIndexPaths = collectionView?.allIndexPaths {
+//                let cachedIndexPaths = Set(cachedAttributes.keys)
+//                let currentIndexPaths = Set(allIndexPaths)
+//
+//                let substractedIndexPaths = currentIndexPaths.subtracting(cachedIndexPaths)
+//                substractedIndexPaths.forEach { cachedAttributes.removeValue(forKey: $0) }
+//            }
+//        }
     }
     
     private func additionalHeight(for indexPath: IndexPath) -> CGFloat {
@@ -337,7 +365,8 @@ func indexPathMapping(for blockInfoArray: [BlockInformation]) -> [IndexPath: Row
     }
     
     for rootBlockInfo in blockInfoArray.enumerated() {
-        indexPathMap[IndexPath(row: rootBlockInfo.offset + 1, section: 1)] = .init(
+        indexPathMap[IndexPath(row: rootBlockInfo.offset + 1, section: 1)] = RowInformation(
+            id: rootBlockInfo.element.id,
             allChildIndexPaths: traverseBlockInfo(rootBlockInfo.element),
             indentations: findIdentation(currentIdentations: [], block: rootBlockInfo.element),
             ownStyle: rootBlockInfo.element.content.indentationStyle
@@ -369,11 +398,11 @@ public enum BlockIndentationStyle: Hashable, Equatable {
     var padding: CGFloat {
         switch self {
         case .none:
-            return EditorFlowLayoutPaddings.default
+            return LayoutConstants.Paddings.default
         case .quote:
-            return EditorFlowLayoutPaddings.quote
+            return LayoutConstants.Paddings.quote
         case .callout:
-            return EditorFlowLayoutPaddings.quote
+            return LayoutConstants.Paddings.quote
         }
     }
     
