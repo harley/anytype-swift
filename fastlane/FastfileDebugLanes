@@ -6,20 +6,28 @@ platform :ios do
 
   lane :test_build do
     setup_ci
-    match(readonly: true)
 
-    desc "Runs all the tests"
-    
-    build_app(
-      scheme: ENV["APP_TARGET"], 
-      configuration: ENV["APP_CONF_DEVELOP"],
-      include_symbols: true,
-      use_system_scm: true,
-      archive_path: "./build/archive",
-      output_directory: "./build/result",
-      xcargs: ENV['BUILD_OPTIONS'],
-      cloned_source_packages_path: ENV['SPM_DERIVED_DATA']
+    add_git_tag(
+      tag: "testtag",
+      force: true
     )
+
+    push_to_git_remote(no_verify: true)
+    
+    # match(readonly: true)
+
+    # desc "Runs all the tests"
+    
+    # build_app(
+    #   scheme: ENV["APP_TARGET"], 
+    #   configuration: ENV["APP_CONF_DEVELOP"],
+    #   include_symbols: true,
+    #   use_system_scm: true,
+    #   archive_path: "./build/archive",
+    #   output_directory: "./build/result",
+    #   xcargs: ENV['BUILD_OPTIONS'],
+    #   cloned_source_packages_path: ENV['SPM_DERIVED_DATA']
+    # )
 
   end
 
