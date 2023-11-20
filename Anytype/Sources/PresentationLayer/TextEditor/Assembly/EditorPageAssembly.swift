@@ -292,11 +292,6 @@ final class EditorAssembly {
             ]
         )
         
-        let blockDelegate = BlockDelegateImpl(
-            viewInput: viewInput,
-            accessoryState: accessoryState.0,
-            cursorManager: cursorManager
-        )
         let headerModel = ObjectHeaderViewModel(
             document: document,
             configuration: configuration,
@@ -313,12 +308,12 @@ final class EditorAssembly {
             pasteboardService: pasteboardService,
             markdownListener: markdownListener,
             focusSubjectHolder: focusSubjectHolder,
-            viewInput: viewInput,
             mainEditorSelectionManager: blocksStateManager,
             responderScrollViewHelper: responderScrollViewHelper,
             pageService: serviceLocator.pageRepository(),
             linkToObjectCoordinator: coordinatorsDI.linkToObject().make(browserController: browser),
-            searchService: serviceLocator.searchService()
+            searchService: serviceLocator.searchService(), 
+            accessoryStateManager: accessoryState.0
         )
         
         let slashMenuActionHandler = SlashMenuActionHandler(
@@ -334,7 +329,6 @@ final class EditorAssembly {
             handler: actionHandler,
             pasteboardService: pasteboardService,
             router: router,
-            delegate: blockDelegate,
             markdownListener: markdownListener,
             simpleTableDependenciesBuilder: simpleTableDependenciesBuilder,
             subjectsHolder: focusSubjectHolder,
@@ -346,7 +340,7 @@ final class EditorAssembly {
             objectTypeProvider: serviceLocator.objectTypeProvider(),
             modelsHolder: modelsHolder,
             blockCollectionController: .init(viewInput: viewInput),
-            accessoryStateManager: accessoryState,
+            accessoryStateManager: accessoryState.0,
             cursorManager: cursorManager,
             keyboardActionHandler: keyboardHandler,
             linkToObjectCoordinator: linkToObjectCoordinator,
@@ -363,13 +357,11 @@ final class EditorAssembly {
         let viewModel = EditorPageViewModel(
             document: document,
             viewInput: viewInput,
-            blockDelegate: blockDelegate,
             router: router,
             modelsHolder: modelsHolder,
             blockBuilder: blocksConverter,
             actionHandler: actionHandler,
             headerModel: headerModel,
-            blockActionsService: serviceLocator.blockActionsServiceSingle(),
             blocksStateManager: blocksStateManager,
             cursorManager: cursorManager,
             objectActionsService: serviceLocator.objectActionsService(),

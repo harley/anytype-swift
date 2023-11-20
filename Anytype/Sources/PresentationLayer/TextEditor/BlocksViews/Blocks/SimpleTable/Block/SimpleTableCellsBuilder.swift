@@ -13,31 +13,37 @@ final class SimpleTableCellsBuilder {
     private let infoContainer: InfoContainerProtocol
     private let blockTableService: BlockTableServiceProtocol
     private let responderScrollViewHelper: ResponderScrollViewHelper
-    private let delegate: BlockDelegate?
+    private let stateManager: SimpleTableStateManager
+    private let blockMarkupChanger: BlockMarkupChangerProtocol
+    private let accessoryStateManager: AccessoryViewStateManager
     
     init(
         document: BaseDocumentProtocol,
         router: EditorRouterProtocol,
         handler: BlockActionHandlerProtocol,
         pasteboardService: PasteboardServiceProtocol,
-        delegate: BlockDelegate?,
         markdownListener: MarkdownListener,
         cursorManager: EditorCursorManager,
         focusSubjectHolder: FocusSubjectsHolder,
         responderScrollViewHelper: ResponderScrollViewHelper,
+        stateManager: SimpleTableStateManager,
+        accessoryStateManager: AccessoryViewStateManager,
+        blockMarkupChanger: BlockMarkupChangerProtocol,
         blockTableService: BlockTableServiceProtocol = BlockTableService()
     ) {
         self.document = document
         self.router = router
         self.handler = handler
         self.pasteboardService = pasteboardService
-        self.delegate = delegate
         self.markdownListener = markdownListener
         self.cursorManager = cursorManager
         self.focusSubjectHolder = focusSubjectHolder
         self.infoContainer = document.infoContainer
         self.responderScrollViewHelper = responderScrollViewHelper
+        self.stateManager = stateManager
+        self.blockMarkupChanger = blockMarkupChanger
         self.blockTableService = blockTableService
+        self.accessoryStateManager = accessoryStateManager
     }
     
     func buildItems(
@@ -90,16 +96,27 @@ final class SimpleTableCellsBuilder {
         table: ComputedTable,
         isHeaderRow: Bool
     ) -> EditorItem {
-        let isCheckable = content.contentType == .title ? document.details?.layoutValue == .todo : false
-        let anytypeText = content.anytypeText(document: document)
-        
         let textBlockActionHandler = SimpleTablesTextBlockActionHandler(
             info: information,
+            focusSubject: focusSubjectHolder.focusSubject(for: information.id),
+            actionHandler: handler,
+            pasteboardService: pasteboardService,
+            markdownListener: markdownListener,
+            cursorManager: cursorManager,
+            accessoryViewStateManager: accessoryStateManager,
+            markupChanger: blockMarkupChanger,
+            responderScrollViewHelper: responderScrollViewHelper,
             showPage: { [weak self] objectId in
                 self?.router.showPage(objectId: objectId)
             },
             openURL: { [weak router] url in
                 router?.openUrl(url)
+            },
+            onShowStyleMenu: { [weak stateManager] info in
+                stateManager?.didSelectStyleSelection(infos: [info])
+            },
+            onEnterSelectionMode: { [weak stateManager] info in
+                stateManager?.didSelectEditingState(info: info)
             },
             showTextIconPicker: { [weak router, weak document] in
                 guard let router, let document else { return }
@@ -114,33 +131,20 @@ final class SimpleTableCellsBuilder {
             hideWaitingView: {  [weak router] in
                 router?.hideWaitingView()
             },
-            content: content,
-            anytypeText: anytypeText,
-            actionHandler: handler,
-            pasteboardService: pasteboardService,
-            markdownListener: markdownListener,
-            blockDelegate: delegate,
             onKeyboardAction: { [weak self] action in
                 self?.handleKeyboardAction(table: table, block: information, action: action)
-            },
-            responderScrollViewHelper: responderScrollViewHelper
+            }
         )
         
-        return EditorItem.header(.empty(data: .init(presentationStyle: .editor, onTap: {}), isShimmering: false))
-        
-//        return EditorItem.system(SpacerBlockViewModel(usage: .another))
-//        fatalError()
-        //        let viewModel = TextBlockViewModel(
-        //            info: information,
-        //            content: content,
-        //            anytypeText: anytypeText,
-        //            isCheckable: isCheckable,
-        //            focusSubject: focusSubjectHolder.focusSubject(for: information.id),
-        //            actionHandler: textBlockActionHandler,
-        //            customBackgroundColor: isHeaderRow ? UIColor.headerRowColor : nil
-        //        )
-        
-        //        return EditorItem.block(viewModel)
+        let textBlockViewModel = TextBlockViewModel(
+            document: document,
+            blockInformationProvider: .init(infoContainer: document.infoContainer, info: information),
+            stylePublisher: .empty(),
+            actionHandler: textBlockActionHandler,
+            cursorManager: cursorManager
+        )
+
+        return EditorItem.block(textBlockViewModel)
     }
     
     private func handleKeyboardAction(table: ComputedTable, block: BlockInformation, action: CustomTextView.KeyboardAction) {

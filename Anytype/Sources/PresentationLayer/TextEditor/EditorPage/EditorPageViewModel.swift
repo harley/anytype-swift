@@ -12,8 +12,6 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     
     let document: BaseDocumentProtocol
     let modelsHolder: EditorMainItemModelsHolder
-    let blockDelegate: BlockDelegate
-    
     let router: EditorRouterProtocol
     
     let actionHandler: BlockActionHandlerProtocol
@@ -37,15 +35,14 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
     init(
         document: BaseDocumentProtocol,
         viewInput: EditorPageViewInput,
-        blockDelegate: BlockDelegate,
         router: EditorRouterProtocol,
         modelsHolder: EditorMainItemModelsHolder,
         blockBuilder: BlockViewModelBuilder,
         actionHandler: BlockActionHandler,
         headerModel: ObjectHeaderViewModel,
-        blockActionsService: BlockActionsServiceSingleProtocol,
         blocksStateManager: EditorPageBlocksStateManagerProtocol,
         cursorManager: EditorCursorManager,
+        objectActionsService: ObjectActionsServiceProtocol,
         searchService: SearchServiceProtocol,
         editorPageTemplatesHandler: EditorPageTemplatesHandlerProtocol,
         accountManager: AccountManagerProtocol,
@@ -59,9 +56,7 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
         self.modelsHolder = modelsHolder
         self.blockBuilder = blockBuilder
         self.actionHandler = actionHandler
-        self.blockDelegate = blockDelegate
         self.headerModel = headerModel
-        self.blockActionsService = blockActionsService
         self.blocksStateManager = blocksStateManager
         self.cursorManager = cursorManager
         self.objectActionsService = objectActionsService
@@ -93,10 +88,11 @@ final class EditorPageViewModel: EditorPageViewModelProtocol {
         }.store(in: &subscriptions)
         
         document.resetBlocksSubject.sink { [weak self] blockIds in
-            guard let items = self?.blockBuilder.buildEditorItems(infos: Array(blockIds)) else {
-                return
-            }
-            self?.viewInput?.reconfigure(items: items)
+            guard let self else { return }
+            let filtered = Set(blockIds).intersection(modelsHolder.blocksMapping.keys)
+            
+            let items = blockBuilder.buildEditorItems(infos: Array(filtered))
+            viewInput?.reconfigure(items: items)
         }.store(in: &subscriptions)
     }
     

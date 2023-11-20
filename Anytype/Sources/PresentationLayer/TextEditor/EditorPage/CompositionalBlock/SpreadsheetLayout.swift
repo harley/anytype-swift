@@ -2,13 +2,8 @@ import UIKit
 import Combine
 import AnytypeCore
 
-protocol RelativePositionProvider: AnyObject {
-    func visibleRect(to view: UIView) -> CGRect
-}
-
 final class SpreadsheetLayout: UICollectionViewLayout {
     weak var dataSource: SpreadsheetViewDataSource?
-    weak var relativePositionProvider: RelativePositionProvider?
     var itemWidths = [CGFloat]() {
         didSet {
             reset()

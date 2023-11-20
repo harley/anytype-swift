@@ -20,6 +20,10 @@ final class EditorBlockCollectionController: EditorCollectionReloadable {
         viewInput?.itemDidChangeFrame(item: item)
     }
     
+    func scrollToBlock(blockId: BlockId) {
+        viewInput?.scrollToBlock(blockId: blockId)
+    }
+    
     func textBlockDidBeginEditing(firstResponderView: UIView) {
         viewInput?.textBlockDidBeginEditing(firstResponderView: firstResponderView)
     }

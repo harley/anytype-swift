@@ -35,6 +35,7 @@ protocol AccessoryViewOutput: AnyObject {
     func didSelectShowStyleMenu()
 }
 
+@MainActor
 final class AccessoryViewStateManagerImpl: AccessoryViewStateManager, CursorModeAccessoryViewDelegate {
     private var configuration: TextViewAccessoryConfiguration?
     private(set) var triggerSymbolPosition: UITextPosition?

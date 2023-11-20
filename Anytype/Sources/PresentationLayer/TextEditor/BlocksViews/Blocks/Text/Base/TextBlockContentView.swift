@@ -148,6 +148,8 @@ final class TextBlockContentView: UIView, BlockContentView, DynamicHeightView, F
 
             textView.textView.setFocus(position)
         }
+        
+        backgroundColor = .randomColor()
     }
     
     private func updateAllConstraint(blockTextStyle: BlockText.Style) {

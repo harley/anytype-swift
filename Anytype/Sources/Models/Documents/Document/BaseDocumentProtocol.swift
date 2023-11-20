@@ -35,6 +35,4 @@ protocol BaseDocumentProtocol: AnyObject, BaseDocumentGeneralProtocol {
     var childrenPublisher: AnyPublisher<[BlockInformation], Never> { get }
     var syncPublisher: AnyPublisher<Void, Never> { get }
     var resetBlocksSubject: PassthroughSubject<Set<BlockId>, Never> { get }
-    
-    func resetSubscriptions()
 }

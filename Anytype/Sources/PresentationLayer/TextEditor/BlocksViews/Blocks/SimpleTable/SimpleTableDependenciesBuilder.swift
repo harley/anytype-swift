@@ -3,8 +3,6 @@ import UIKit
 import AnytypeCore
 
 struct SimpleTableDependenciesContainer {
-    let blockDelegate: BlockDelegate?
-    let relativePositionProvider: RelativePositionProvider?
     let stateManager: SimpleTableStateManager
     let viewModel: SimpleTableViewModel
 }
@@ -24,9 +22,11 @@ final class SimpleTableDependenciesBuilder {
     private let pageService: PageRepositoryProtocol
     private let linkToObjectCoordinator: LinkToObjectCoordinatorProtocol
     private let searchService: SearchServiceProtocol
+    private let accessoryStateManager: AccessoryViewStateManager
+//    private let collectionController: EditorBlockCollectionController
 
     weak var mainEditorSelectionManager: SimpleTableSelectionHandler?
-    weak var viewInput: (EditorPageViewInput & RelativePositionProvider)?
+    
 
     init(
         document: BaseDocumentProtocol,
@@ -35,12 +35,12 @@ final class SimpleTableDependenciesBuilder {
         pasteboardService: PasteboardServiceProtocol,
         markdownListener: MarkdownListener,
         focusSubjectHolder: FocusSubjectsHolder,
-        viewInput: (EditorPageViewInput & RelativePositionProvider)?,
         mainEditorSelectionManager: SimpleTableSelectionHandler?,
         responderScrollViewHelper: ResponderScrollViewHelper,
         pageService: PageRepositoryProtocol,
         linkToObjectCoordinator: LinkToObjectCoordinatorProtocol,
-        searchService: SearchServiceProtocol
+        searchService: SearchServiceProtocol,
+        accessoryStateManager: AccessoryViewStateManager
     ) {
         self.document = document
         self.router = router
@@ -48,12 +48,13 @@ final class SimpleTableDependenciesBuilder {
         self.pasteboardService = pasteboardService
         self.markdownListener = markdownListener
         self.focusSubjectHolder = focusSubjectHolder
-        self.viewInput = viewInput
+//        self.collectionController = collectionController
         self.mainEditorSelectionManager = mainEditorSelectionManager
         self.responderScrollViewHelper = responderScrollViewHelper
         self.pageService = pageService
         self.linkToObjectCoordinator = linkToObjectCoordinator
         self.searchService = searchService
+        self.accessoryStateManager = accessoryStateManager
         
         self.cursorManager = EditorCursorManager(focusSubjectHolder: focusSubjectHolder)
     }
@@ -83,22 +84,18 @@ final class SimpleTableDependenciesBuilder {
             searchService: searchService
         )
 
-        let simpleTablesBlockDelegate = BlockDelegateImpl(
-            viewInput: viewInput,
-            accessoryState: simpleTablesAccessoryState.0,
-            cursorManager: cursorManager
-        )
-
         let cellsBuilder = SimpleTableCellsBuilder(
             document: document,
             router: router,
             handler: handler,
             pasteboardService: pasteboardService,
-            delegate: simpleTablesBlockDelegate,
             markdownListener: markdownListener,
             cursorManager: cursorManager,
             focusSubjectHolder: focusSubjectHolder,
-            responderScrollViewHelper: responderScrollViewHelper
+            responderScrollViewHelper: responderScrollViewHelper, 
+            stateManager: stateManager,
+            accessoryStateManager: accessoryStateManager,
+            blockMarkupChanger: BlockMarkupChanger()
         )
 
         let viewModel = SimpleTableViewModel(
@@ -109,11 +106,6 @@ final class SimpleTableDependenciesBuilder {
             cursorManager: cursorManager
         )
 
-        return .init(
-            blockDelegate: simpleTablesBlockDelegate,
-            relativePositionProvider: viewInput,
-            stateManager: stateManager,
-            viewModel: viewModel
-        )
+        return .init(stateManager: stateManager, viewModel: viewModel)
     }
 }

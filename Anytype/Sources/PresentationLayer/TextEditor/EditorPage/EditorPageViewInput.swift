@@ -5,6 +5,7 @@ protocol EditorCollectionReloadable: AnyObject {
     func reload(items: [EditorItem])
     func reconfigure(items: [EditorItem])
     func itemDidChangeFrame(item: EditorItem)
+    func scrollToBlock(blockId: BlockId) // Change to editorItem
     
     /// Tells the delegate when editing of the text block begins
     func textBlockDidBeginEditing(firstResponderView: UIView)
@@ -14,8 +15,7 @@ protocol EditorCollectionReloadable: AnyObject {
 }
 
 /// Input data for document view
-protocol EditorPageViewInput: RelativePositionProvider, EditorCollectionReloadable {
-    
+protocol EditorPageViewInput: EditorCollectionReloadable {
     func update(header: ObjectHeader)
     func update(details: ObjectDetails?, templatesCount: Int)
     func update(
@@ -25,7 +25,6 @@ protocol EditorPageViewInput: RelativePositionProvider, EditorCollectionReloadab
     )
     func update(syncStatus: SyncStatus)
     
-    func scrollToBlock(blockId: BlockId)
 
     func endEditing()
 

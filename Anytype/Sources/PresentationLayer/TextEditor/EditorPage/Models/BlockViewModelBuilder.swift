@@ -8,7 +8,6 @@ final class BlockViewModelBuilder {
     private let handler: BlockActionHandlerProtocol
     private let pasteboardService: PasteboardServiceProtocol
     private let router: EditorRouterProtocol
-    private let delegate: BlockDelegate
     private let subjectsHolder: FocusSubjectsHolder
     private let markdownListener: MarkdownListener
     private let simpleTableDependenciesBuilder: SimpleTableDependenciesBuilder
@@ -34,7 +33,6 @@ final class BlockViewModelBuilder {
         handler: BlockActionHandlerProtocol,
         pasteboardService: PasteboardServiceProtocol,
         router: EditorRouterProtocol,
-        delegate: BlockDelegate,
         markdownListener: MarkdownListener,
         simpleTableDependenciesBuilder: SimpleTableDependenciesBuilder,
         subjectsHolder: FocusSubjectsHolder,
@@ -58,7 +56,6 @@ final class BlockViewModelBuilder {
         self.handler = handler
         self.pasteboardService = pasteboardService
         self.router = router
-        self.delegate = delegate
         self.markdownListener = markdownListener
         self.simpleTableDependenciesBuilder = simpleTableDependenciesBuilder
         self.subjectsHolder = subjectsHolder
@@ -326,7 +323,7 @@ final class BlockViewModelBuilder {
                 info: info,
                 document: document,
                 onTap: { [weak self] blockId in
-                    self?.delegate.scrollToBlock(blockId: blockId)
+                    self?.blockCollectionController.scrollToBlock(blockId: blockId)
                 },
                 editorCollectionController: blockCollectionController
             )
@@ -338,6 +335,7 @@ final class BlockViewModelBuilder {
                 infoContainer: infoContainer,
                 tableService: tableService,
                 document: document,
+                editorCollectionController: blockCollectionController,
                 focusSubject: subjectsHolder.focusSubject(for: info.id)
             )
         case let .dataView(data):

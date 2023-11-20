@@ -95,9 +95,11 @@ final class EditorCollectionFlowLayout: UICollectionViewLayout {
         }
     }
     
-    private var cachedAttributes = [AnyHashable: LayoutItem]()
-    private var blockLayoutDetails = [AnyHashable: RowInformation]()
+    private var cachedAttributes = [AnyHashable: LayoutItem]() // Actual
     private var _nonInvalidatedAttributed = [AnyHashable: LayoutItem]()
+    
+    private var blockLayoutDetails = [AnyHashable: RowInformation]()
+    
 
     private var maxHeight = LayoutConstants.estimatedItemHeight
     override var collectionViewContentSize: CGSize { CGSize(width: collectionViewWidth, height: collectionViewHeight) }
@@ -212,13 +214,11 @@ final class EditorCollectionFlowLayout: UICollectionViewLayout {
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard let item = itemIdentifier(for: indexPath),
                let layoutDetails = cachedAttributes[item.hashable] else {
-            return nil
+            return nil //
         }
         
         return layoutDetails.attributes(collectionViewWidth: collectionViewWidth)
     }
-    
-   
     
     override func shouldInvalidateLayout(
         forPreferredLayoutAttributes preferredAttributes: UICollectionViewLayoutAttributes,
@@ -292,8 +292,6 @@ final class EditorCollectionFlowLayout: UICollectionViewLayout {
                 let hash = dataSource.itemIdentifier(for: $0)?.hashable
                 hash.map { cachedAttributes[$0] = nil }
             }
-            
-            
         }
     }
     
@@ -420,7 +418,7 @@ public enum BlockIndentationStyle: Hashable, Equatable {
         case .none:
             return 0
         case .quote, .callout:
-            return 20
+            return LayoutConstants.Paddings.default
         }
     }
 }

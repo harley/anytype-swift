@@ -10,7 +10,7 @@ import Services
 import Foundation
 import Combine
 
-final class MockBaseDocument: BaseDocumentProtocol {
+final class MockBaseDocument: BaseDocumentProtocol {    
     var resetBlocksSubject: PassthroughSubject<Set<Services.BlockId>, Never> { fatalError() }
     
     var childrenPublisher: AnyPublisher<[Services.BlockInformation], Never> { fatalError() }

@@ -151,11 +151,6 @@ final class BaseDocument: BaseDocumentProtocol {
         isOpened = false
     }
     
-    func resetSubscriptions() {
-        subscriptions = []
-        eventsListener.stopListening()
-    }
-    
     var children: [BlockInformation] {
         print("Children count in document \(_children.count)")
         return _children

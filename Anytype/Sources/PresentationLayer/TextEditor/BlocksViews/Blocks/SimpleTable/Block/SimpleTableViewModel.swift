@@ -13,7 +13,7 @@ final class SimpleTableViewModel {
     private let document: BaseDocumentProtocol
     private let cellBuilder: SimpleTableCellsBuilder
     private let cursorManager: EditorCursorManager
-    private var tableBlockInfo: BlockInformation
+    private var tableBlockInfoProvider: BlockModelInfomationProvider
 
     @Published var widths = [CGFloat]()
 
@@ -21,13 +21,13 @@ final class SimpleTableViewModel {
 
     init(
         document: BaseDocumentProtocol,
-        tableBlockInfo: BlockInformation,
+        tableBlockInfoProvider: BlockModelInfomationProvider,
         cellBuilder: SimpleTableCellsBuilder,
         stateManager: SimpleTableStateManagerProtocol,
         cursorManager: EditorCursorManager
     ) {
         self.document = document
-        self.tableBlockInfo = tableBlockInfo
+        self.tableBlockInfoProvider = tableBlockInfoProvider
         self.cellBuilder = cellBuilder
         self.stateManager = stateManager
         self.cursorManager = cursorManager
@@ -38,43 +38,87 @@ final class SimpleTableViewModel {
     }
 
     private func setupHandlers() {
-        #warning("Make simple tables great again")
+        document.resetBlocksSubject.sink { [weak self] blockIds in
+            guard let self else { return }
+            if blockIds.contains(tableBlockInfoProvider.info.id) {
+                forceUpdate(shouldApplyFocus: true)
+                stateManager.checkDocumentLockField()
+            } else {
+                let items = blockIds.compactMap { self.dataSource?.dataSourceItem(for: $0) }
+                
+                var shouldUpdateDataSource = false
+                
+                let dataSourceItems = dataSource?.allModels
+                    .flatMap { $0 }
+                    .filter {
+//                        let computedTable = ComputedTable(
+//                            blockInformation: <#T##BlockInformation#>,
+//                            infoContainer: <#T##InfoContainerProtocol#>
+//                        )
+                        guard let stringValue = $0.hashable as? String else {
+                            return false
+                        }
+                        
+                        for blockId in blockIds {
+                            if stringValue.contains(blockId) {
+                                if case .system = $0 {
+                                    shouldUpdateDataSource = true // TOFIX
+                                }
+                                
+                                return true
+                            }
+                        }
+                
+                        return false
+                    }
+                
+                if shouldUpdateDataSource {
+                    forceUpdate(shouldApplyFocus: true)
+                }
+                
+                
+                if let dataSourceItems, dataSourceItems.isNotEmpty {
+                    self.dataSource?.reconfigureItems(items: dataSourceItems)
+                }
+//                dataSource?.reconfigureItems(items: items)
+            }
+        }.store(in: &cancellables)
 //        document.updatePublisher.sink { [weak self] update in
 //            self?.handleUpdate(update: update)
 //        }.store(in: &cancellables)
     }
 
-    private func handleUpdate(update: DocumentUpdate) {
-        switch update {
-        case .general, .details, .children:
-            forceUpdate(shouldApplyFocus: true)
-        case .syncStatus: break
-        case .blocks(let blockIds):
-            let container = document.infoContainer
-
-            let allChilds = container.recursiveChildren(of: tableBlockInfo.id).map(\.id)
-            guard blockIds.intersection(Set(allChilds)).isNotEmpty else {
-                return
-            }
-
-            let newItems = cellBuilder.buildItems(from: tableBlockInfo)
-
-           updateDifference(newItems: newItems)
-//        case .dataSourceUpdate:
-//            guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
+//    private func handleUpdate(update: DocumentUpdate) {
+//        switch update {
+//        case .general, .details, .children:
+//            forceUpdate(shouldApplyFocus: true)
+//        case .syncStatus: break
+//        case .blocks(let blockIds):
+//            let container = document.infoContainer
+//
+//            let allChilds = container.recursiveChildren(of: tableBlockInfo.id).map(\.id)
+//            guard blockIds.intersection(Set(allChilds)).isNotEmpty else {
 //                return
 //            }
-//            tableBlockInfo = newInfo
 //
-//            let cells = cellBuilder.buildItems(from: newInfo)
+//            let newItems = cellBuilder.buildItems(from: tableBlockInfo)
 //
-//            dataSource?.allModels = cells
-        case .unhandled(blockIds: let blockIds):
-            return
-        }
-
-        stateManager.checkDocumentLockField()
-    }
+//           updateDifference(newItems: newItems)
+////        case .dataSourceUpdate:
+////            guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
+////                return
+////            }
+////            tableBlockInfo = newInfo
+////
+////            let cells = cellBuilder.buildItems(from: newInfo)
+////
+////            dataSource?.allModels = cells
+//        case .unhandled(blockIds: let blockIds):
+//            return
+//        }
+//
+//        stateManager.checkDocumentLockField()
+//    }
 
     private func updateDifference(newItems: [[EditorItem]]) {
         let newItems = cellBuilder.buildItems(from: tableBlockInfo)

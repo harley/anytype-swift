@@ -8,11 +8,7 @@ struct AccessoryViewBuilder {
         actionHandler: BlockActionHandlerProtocol,
         router: EditorRouterProtocol,
         document: BaseDocumentProtocol,
-        onShowStyleMenu: @escaping RoutingAction<[BlockInformation]>,
-        onBlockSelection: @escaping RoutingAction<BlockInformation>,
-        pageService: PageRepositoryProtocol,
-        linkToObjectCoordinator: LinkToObjectCoordinatorProtocol,
-        cursorManager: EditorCursorManager
+        searchService: SearchServiceProtocol
     ) -> (AccessoryViewStateManager, ChangeTypeAccessoryViewModel) {
         let mentionsModule = MentionAssembly().controller(document: document)
 

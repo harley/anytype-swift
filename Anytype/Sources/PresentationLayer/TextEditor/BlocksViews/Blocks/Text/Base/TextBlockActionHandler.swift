@@ -408,6 +408,7 @@ final class TextBlockActionHandler: TextBlockActionHandlerProtocol {
 }
 
 extension TextBlockActionHandler: AccessoryViewOutput {
+    @MainActor
     func showLinkToSearch(range: NSRange, text: NSAttributedString) {
         let urlLink = text.linkState(range: range)
         let objectIdLink = text.linkToObjectState(range: range)
