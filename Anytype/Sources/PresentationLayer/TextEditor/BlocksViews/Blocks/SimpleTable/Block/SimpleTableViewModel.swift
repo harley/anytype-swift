@@ -40,52 +40,16 @@ final class SimpleTableViewModel {
     private func setupHandlers() {
         document.resetBlocksSubject.sink { [weak self] blockIds in
             guard let self else { return }
-            if blockIds.contains(tableBlockInfoProvider.info.id) {
+            
+            guard let computedTable = ComputedTable(blockInformation: tableBlockInfoProvider.info, infoContainer: document.infoContainer) else {
+                return
+            }
+            var allRelatedIds = [tableBlockInfoProvider.info.id] + document.infoContainer.recursiveChildren(of: tableBlockInfoProvider.info.id).map { $0.id }
+            
+            if Set(allRelatedIds).intersection(blockIds).count > 0 {
                 forceUpdate(shouldApplyFocus: true)
-                stateManager.checkDocumentLockField()
-            } else {
-                let items = blockIds.compactMap { self.dataSource?.dataSourceItem(for: $0) }
-                
-                var shouldUpdateDataSource = false
-                
-                let dataSourceItems = dataSource?.allModels
-                    .flatMap { $0 }
-                    .filter {
-//                        let computedTable = ComputedTable(
-//                            blockInformation: <#T##BlockInformation#>,
-//                            infoContainer: <#T##InfoContainerProtocol#>
-//                        )
-                        guard let stringValue = $0.hashable as? String else {
-                            return false
-                        }
-                        
-                        for blockId in blockIds {
-                            if stringValue.contains(blockId) {
-                                if case .system = $0 {
-                                    shouldUpdateDataSource = true // TOFIX
-                                }
-                                
-                                return true
-                            }
-                        }
-                
-                        return false
-                    }
-                
-                if shouldUpdateDataSource {
-                    forceUpdate(shouldApplyFocus: true)
-                }
-                
-                
-                if let dataSourceItems, dataSourceItems.isNotEmpty {
-                    self.dataSource?.reconfigureItems(items: dataSourceItems)
-                }
-//                dataSource?.reconfigureItems(items: items)
             }
         }.store(in: &cancellables)
-//        document.updatePublisher.sink { [weak self] update in
-//            self?.handleUpdate(update: update)
-//        }.store(in: &cancellables)
     }
 
 //    private func handleUpdate(update: DocumentUpdate) {
@@ -121,7 +85,7 @@ final class SimpleTableViewModel {
 //    }
 
     private func updateDifference(newItems: [[EditorItem]]) {
-        let newItems = cellBuilder.buildItems(from: tableBlockInfo)
+        let newItems = cellBuilder.buildItems(from: tableBlockInfoProvider.info)
 
         var itemsToUpdate = [EditorItem]()
         zip(newItems, dataSource!.allModels).forEach { newSections, currentSections in
@@ -136,12 +100,7 @@ final class SimpleTableViewModel {
     }
 
     private func forceUpdate(shouldApplyFocus: Bool) {
-        guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
-            return
-        }
-        tableBlockInfo = newInfo
-
-        let cells = cellBuilder.buildItems(from: newInfo)
+        let cells = cellBuilder.buildItems(from: tableBlockInfoProvider.info)
         let numberOfColumns = cells.first?.count ?? 0
 
         let widths = [CGFloat](repeating: 170, count: numberOfColumns)

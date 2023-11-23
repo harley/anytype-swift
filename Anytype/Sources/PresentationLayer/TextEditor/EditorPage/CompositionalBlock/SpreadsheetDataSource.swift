@@ -41,7 +41,6 @@ final class SpreadsheetViewDataSource {
         
     
         dataSource.apply(snapshot)
-//        items.forEach(reloadCell(for:))
     }
 
     func update(

@@ -17,6 +17,9 @@ final class SimpleTableCellsBuilder {
     private let blockMarkupChanger: BlockMarkupChangerProtocol
     private let accessoryStateManager: AccessoryViewStateManager
     
+    private var textBlocksMapping = [BlockId: EditorItem]()
+    private var emptyBlocksMapping = [BlockId: EditorItem]()
+    
     init(
         document: BaseDocumentProtocol,
         router: EditorRouterProtocol,
@@ -78,7 +81,7 @@ final class SimpleTableCellsBuilder {
         rowId: BlockId,
         isHeaderRow: Bool
     ) -> EditorItem {
-        .system(
+         .system(
             EmptyRowViewViewModel(
                 contextId: document.objectId,
                 rowId: rowId,
@@ -96,6 +99,10 @@ final class SimpleTableCellsBuilder {
         table: ComputedTable,
         isHeaderRow: Bool
     ) -> EditorItem {
+        if let textBlock = textBlocksMapping[information.id] {
+            return textBlock
+        }
+        
         let textBlockActionHandler = SimpleTablesTextBlockActionHandler(
             info: information,
             focusSubject: focusSubjectHolder.focusSubject(for: information.id),
@@ -143,6 +150,8 @@ final class SimpleTableCellsBuilder {
             actionHandler: textBlockActionHandler,
             cursorManager: cursorManager
         )
+        
+        textBlocksMapping[information.id] = .block(textBlockViewModel)
 
         return EditorItem.block(textBlockViewModel)
     }
