@@ -89,7 +89,13 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
             onEnterAtTheEndOfContent(info: info, text: text, range: range, action: action, newString: string)
             
         case let .enterAtTheBegining(_, range):
-            service.split(currentString, blockId: info.id, mode: .bottom, range: range, newBlockContentType: text.contentType)
+            service.add(
+                info: .empty(content: .text(.empty(contentType: text.contentType))),
+                targetBlockId: info.id,
+                position: .top,
+                setFocus: false
+            )
+//            service.split(currentString, blockId: info.id, mode: .bottom, range: range, newBlockContentType: text.contentType)
         case .delete:
             Task {
                 await onDelete(text: text, info: info, parent: parent)
@@ -116,6 +122,13 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
         {
             // on delete of last child of block - move child to parent level
             try? await listService.move(objectId: documentId, blockId: info.id, targetId: parent.id, position: .bottom)
+            return
+        }
+        
+        let model = modelsHolder?.findModel(beforeBlockId: info.id, acceptingTypes: BlockContentType.allTextTypes)
+
+        if let model, model.info.isTextAndEmpty { // Preventing weird animation when previous block is empty
+            service.delete(blockIds: [model.info.id])
             return
         }
         

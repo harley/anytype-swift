@@ -48,41 +48,10 @@ final class SimpleTableViewModel {
             
             if Set(allRelatedIds).intersection(blockIds).count > 0 {
                 forceUpdate(shouldApplyFocus: true)
+                stateManager.checkDocumentLockField()
             }
         }.store(in: &cancellables)
     }
-
-//    private func handleUpdate(update: DocumentUpdate) {
-//        switch update {
-//        case .general, .details, .children:
-//            forceUpdate(shouldApplyFocus: true)
-//        case .syncStatus: break
-//        case .blocks(let blockIds):
-//            let container = document.infoContainer
-//
-//            let allChilds = container.recursiveChildren(of: tableBlockInfo.id).map(\.id)
-//            guard blockIds.intersection(Set(allChilds)).isNotEmpty else {
-//                return
-//            }
-//
-//            let newItems = cellBuilder.buildItems(from: tableBlockInfo)
-//
-//           updateDifference(newItems: newItems)
-////        case .dataSourceUpdate:
-////            guard let newInfo = document.infoContainer.get(id: tableBlockInfo.id) else {
-////                return
-////            }
-////            tableBlockInfo = newInfo
-////
-////            let cells = cellBuilder.buildItems(from: newInfo)
-////
-////            dataSource?.allModels = cells
-//        case .unhandled(blockIds: let blockIds):
-//            return
-//        }
-//
-//        stateManager.checkDocumentLockField()
-//    }
 
     private func updateDifference(newItems: [[EditorItem]]) {
         let newItems = cellBuilder.buildItems(from: tableBlockInfoProvider.info)

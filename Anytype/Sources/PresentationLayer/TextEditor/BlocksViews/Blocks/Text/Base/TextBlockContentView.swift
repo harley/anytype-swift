@@ -147,9 +147,7 @@ final class TextBlockContentView: UIView, BlockContentView, DynamicHeightView, F
             print("Someone wants to set initial focus \(position)")
 
             textView.textView.setFocus(position)
-        }
-        
-        backgroundColor = .randomColor()
+        }        
     }
     
     private func updateAllConstraint(blockTextStyle: BlockText.Style) {
