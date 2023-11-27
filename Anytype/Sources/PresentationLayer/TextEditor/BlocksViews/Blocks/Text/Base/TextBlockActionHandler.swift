@@ -454,6 +454,8 @@ extension TextBlockActionHandler: AccessoryViewOutput {
     func setNewText(attributedString: NSAttributedString) {
         resetSubject.send(attributedString)
         actionHandler.changeText(attributedString, blockId: info.id)
+        
+        viewModel.map { collectionController.itemDidChangeFrame(item: .block($0)) }
     }
     
     func changeText(attributedString: NSAttributedString) {
