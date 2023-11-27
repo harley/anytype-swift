@@ -16,6 +16,7 @@ final class EditorPageController: UIViewController {
     private weak var firstResponderView: UIView?
     private lazy var debouncer = Debouncer()
     private let layout = EditorCollectionFlowLayout()
+    private lazy var responderScrollViewHelper = ResponderScrollViewHelper(scrollView: collectionView)
 
     lazy var collectionView: EditorCollectionView = {
         let collectionView = EditorCollectionView(
@@ -411,6 +412,7 @@ extension EditorPageController: EditorPageViewInput {
     }
 
     func blockDidFinishEditing() {
+        self.firstResponderView = nil
         self.selectingRangeTextView = nil
         self.selectingRangeEditorItem = nil
 
@@ -438,7 +440,6 @@ extension EditorPageController: EditorPageViewInput {
 
     // Moved from EditorPageController+FloatingPanelControllerDelegate.swift
     func restoreEditingState() {
-        return
         UIView.animate(withDuration: CATransaction.animationDuration()) { [weak self] in
             self?.insetsHelper?.restoreEditingOffset()
         }
@@ -468,9 +469,7 @@ private extension EditorPageController {
         view.backgroundColor = .Background.primary
         
         setupCollectionView()
-        
         setupInteractions()
-        
         setupLayout()
     }
     
@@ -651,7 +650,14 @@ private extension EditorPageController {
             snapshot,
             to: .main,
             animatingDifferences: EditorPageConfigurationConstants.dataSourceAnimationEnabled,
-            completion: completion
+            completion: { [weak self] in
+                completion()
+                
+                guard let self else { return }
+                firstResponderView.map {
+                    ($0 as? UITextView).map(self.responderScrollViewHelper.textViewDidBeginEditing(textView:))
+                }
+            }
         )
 
         let selectedCells = collectionView.indexPathsForSelectedItems
