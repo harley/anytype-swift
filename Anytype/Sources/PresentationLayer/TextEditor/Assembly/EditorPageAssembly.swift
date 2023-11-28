@@ -243,7 +243,8 @@ final class EditorAssembly {
             listService: listService,
             toggleStorage: ToggleStorage.shared,
             container: document.infoContainer,
-            modelsHolder: modelsHolder
+            modelsHolder: modelsHolder,
+            editorCollectionController: .init(viewInput: viewInput)
         )
         
         let blockTableService = BlockTableService()

@@ -19,6 +19,7 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
     private let toggleStorage: ToggleStorage
     private let container: InfoContainerProtocol
     private weak var modelsHolder: EditorMainItemModelsHolder?
+    private let editorCollectionController: EditorBlockCollectionController
     
     init(
         documentId: String,
@@ -26,7 +27,8 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
         listService: BlockListServiceProtocol,
         toggleStorage: ToggleStorage,
         container: InfoContainerProtocol,
-        modelsHolder: EditorMainItemModelsHolder
+        modelsHolder: EditorMainItemModelsHolder,
+        editorCollectionController: EditorBlockCollectionController
     ) {
         self.documentId = documentId
         self.service = service
@@ -34,6 +36,7 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
         self.toggleStorage = toggleStorage
         self.container = container
         self.modelsHolder = modelsHolder
+        self.editorCollectionController = editorCollectionController
     }
 
     func handle(
@@ -126,6 +129,8 @@ final class KeyboardActionHandler: KeyboardActionHandlerProtocol {
         }
         
         let model = modelsHolder?.findModel(beforeBlockId: info.id, acceptingTypes: BlockContentType.allTextTypes)
+        
+        editorCollectionController.scrollToBlock(blockId: info.id)
 
         if let model, model.info.isTextAndEmpty { // Preventing weird animation when previous block is empty
             service.delete(blockIds: [model.info.id])

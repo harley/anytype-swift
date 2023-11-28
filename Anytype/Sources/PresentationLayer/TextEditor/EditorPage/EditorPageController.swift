@@ -654,9 +654,9 @@ private extension EditorPageController {
                 completion()
                 
                 guard let self else { return }
-                firstResponderView.map {
-                    ($0 as? UITextView).map(self.responderScrollViewHelper.textViewDidBeginEditing(textView:))
-                }
+//                firstResponderView.map {
+//                    ($0 as? UITextView).map(self.responderScrollViewHelper.textViewDidBeginEditing(textView:))
+//                }
             }
         )
 

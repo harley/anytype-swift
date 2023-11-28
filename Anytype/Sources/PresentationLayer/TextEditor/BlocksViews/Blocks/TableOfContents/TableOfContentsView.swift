@@ -26,9 +26,18 @@ final class TableOfContentsView: UIView, BlockContentView {
         
         contentProvider = configuration.contentProviderBuilder()
         
-        contentProvider?.$content.sink { [weak self] content in
-            self?.updateView(content: content)
-        }.store(in: &subscriptions)
+        
+        contentProvider.map { updateView(content: $0.content) }
+        
+        contentProvider?
+            .$content
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] content in
+                self?.updateView(content: content)
+                
+                configuration.blockSetNeedsLayout()
+            }.store(in: &subscriptions)
         
         self.configuration = configuration
     }
@@ -42,8 +51,6 @@ final class TableOfContentsView: UIView, BlockContentView {
         case let .empty(title):
             showEmptyState(title: title)
         }
-        
-        configuration?.blockSetNeedsLayout()
     }
     
     private func showEmptyState(title: String) {

@@ -40,7 +40,9 @@ final class IconTextAttachment: NSTextAttachment {
         glyphPosition position: CGPoint,
         characterIndex charIndex: Int
     ) -> CGRect {
-        guard icon.isNotNil else { return .zero }
+        guard icon.isNotNil else { 
+            return .zero
+        }
         
         let textStorage: NSTextStorage? = textContainer?.layoutManager?.textStorage
         let anyAttribute: Any? = textStorage?.attribute(.font, at: charIndex, effectiveRange: nil)
@@ -56,8 +58,12 @@ final class IconTextAttachment: NSTextAttachment {
         // Shift image to center take into account the offset
         let imageYPoint: CGFloat = -(size.height / 2.0) + yOffset
         let imageOrigin = CGPoint(x: .zero, y: imageYPoint)
+        
+        let rect = CGRect(origin: imageOrigin, size: CGSize(width: size.width + rightPadding, height: size.height))
+        
+        print("REEEECT \(rect)")
 
-        return CGRect(origin: imageOrigin, size: CGSize(width: size.width + rightPadding, height: size.height))
+        return rect
     }
     
     override func viewProvider(for parentView: UIView?, location: NSTextLocation, textContainer: NSTextContainer?) -> NSTextAttachmentViewProvider? {
